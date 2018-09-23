@@ -10,7 +10,7 @@ function _draw()
 end
 
 function player: new(x, y )
- o = or {}
+ local o = {}
  setmetatable(o,self)
  self.__index = self
  o.x =x
@@ -22,6 +22,7 @@ function player: new(x, y )
  o.isfacingright = true
  o.jumppressed = false
  o.jumpvelocity = 2
+ o.jumptimer = 0
 
  o.score = 0
  o.lives = 3
@@ -40,10 +41,32 @@ function updatelocation(actor)
  -- do something
  actor.x += actor.dx
 
- 
+ actor.dy += globals.gravity
 
  --fall
  actor.y += actor.dy
 
 end
+
+function player:moveleft(var)
+ self.isfacingright = false
+ self.dx = -2
+end
+
+function player:moveright(var)
+ self.isfacingright = true
+ self.dx = 2
+end
+
+function player:jump()
+ self.dy=-self.jumpvelocity
+ self.jumptimer+=1
+end
+
+function player:extendjump()
+ self.dy=-self.jumpvelocity
+ self.jumptimer+=1
+end
+
+
 
