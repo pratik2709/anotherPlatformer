@@ -3,17 +3,26 @@ globals = {
 }
 player = {}
 
+function draw_debug()
+ -- do something
+  print(player1:getx(),0,40,11)
+  print(player1:gety(),0,45,11)
+end
+
 function _init()
  player1 = player:new(32,72)
 end
 
 function _update()
+ player1:move()
+
 end
 
 function _draw()
  -- draw code
  cls()
  player1:draw()
+ draw_debug()
 
 end
 
@@ -45,23 +54,31 @@ function player:new(x, y)
  return o
 end
 
+function player:getx()
+ return self.x
+end
+
+function player:gety()
+ return self.y
+end
+
 function updatelocation(actor)
  -- do something
  actor.x += actor.dx
 
- actor.dy += globals.gravity
+ -- actor.dy += globals.gravity
 
  --fall
  actor.y += actor.dy
 
 end
 
-function player:moveleft(var)
+function player:moveleft()
  self.isfacingright = false
  self.dx = -2
 end
 
-function player:moveright(var)
+function player:moveright()
  self.isfacingright = true
  self.dx = 2
 end
