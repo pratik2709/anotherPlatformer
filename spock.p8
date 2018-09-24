@@ -68,5 +68,41 @@ function player:extendjump()
  self.jumptimer+=1
 end
 
+function player:move()
+ --storing start and end locations
+ self.startx = self.x
+ self.starty = self.y
+
+ --jump code
+ if btn(4) and self.isgrounded 
+ and self.jumptimer == 0 then
+  self.jump()
+  self.jumppressed = true
+ elseif btn(4)
+ and self.jumptimer<10
+ and self.jumppressed
+ and self.dy < 0 then
+  -- elseif code
+  self.extendjump()
+ end
+ elseif not btn(4) then
+  -- elseif code
+  self.jumppressed = false
+ end
+
+ --left/right movement set it 0 ?
+ self.dx = 0
+ --left
+ if btn(0) then
+  self.moveleft()
+ end
+--right
+ if btn(1) then
+  self.moveright()
+ end
+ updatelocation(self)
+
+end
+
 
 
