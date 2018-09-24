@@ -1,16 +1,24 @@
-x=64 y=64
+globals = {
+ gravity = 0.2
+}
+player = {}
+
+function _init()
+ player1 = player:new(32,72)
+end
+
 function _update()
-    if(btn(0)) then x=x-1 end
 end
 
 function _draw()
  -- draw code
- rectfill(0,0,127,127,5)
- circfill(x,y,7,8)
+ cls()
+ player1:draw()
+
 end
 
-function player: new(x, y )
- local o = {}
+function player:new(x, y)
+ local o={}
  setmetatable(o,self)
  self.__index = self
  o.x =x
@@ -76,15 +84,15 @@ function player:move()
  --jump code
  if btn(4) and self.isgrounded 
  and self.jumptimer == 0 then
-  self.jump()
+  self:jump()
   self.jumppressed = true
  elseif btn(4)
  and self.jumptimer<10
  and self.jumppressed
  and self.dy < 0 then
   -- elseif code
-  self.extendjump()
- end
+  self:extendjump()
+ 
  elseif not btn(4) then
   -- elseif code
   self.jumppressed = false
@@ -94,15 +102,30 @@ function player:move()
  self.dx = 0
  --left
  if btn(0) then
-  self.moveleft()
+  self:moveleft()
  end
 --right
  if btn(1) then
-  self.moveright()
+  self:moveright()
  end
  updatelocation(self)
 
 end
 
+function player:draw()
+ -- draw only non flash frame
+ if self.flash == false then
+  --draw the sprite either left or right
+  if not self.isgrounded then
+   if self.isfacingright then
+    --http://pico-8.wikia.com/wiki/spr
+    spr(1,self.x, self.y, 1, 1, false)
+   else
+    spr(1,self.x, self.y, 1, 1, true)
+   end 
+  end
+ end     
+
+end
 
 
