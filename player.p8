@@ -24,7 +24,9 @@ end
 function cam:followplayer(playerx)
 --https://gamedev.stackexchange.com/questions/44256/how-to-add-a-scrolling-camera-to-a-2d-java-game
 --https://stackoverflow.com/questions/9997006/slick2d-and-jbox2d-how-to-draw?answertab=votes#tab-top
- self.x=playerx-64.0
+--offsetmaxx = world_size_x - viewport_size_x
+--offsetminx = 0
+ self.x=playerx-self.mapwidth
  -- these sonditions are so that camera doesnt go out
  --of bounds. 16 is length of map u are currently viewing
  --in the viewport
@@ -34,7 +36,7 @@ function cam:followplayer(playerx)
  if self.x>(self.mapwidth-16) then
    self.x = self.mapwidth-16
  end
- camera(playerx-64,0)
+ camera(self.x,0)
 end
 
 function cam:getx()
