@@ -8,8 +8,7 @@ player = {}
 cam = {}
 function draw_debug()
  -- do something
-  print(player1:getx(),0,40,11)
-  print(player1:gety(),0,45,11)
+  print(player1:getx(),player1:getx(),0,11)
 end
 
 function cam:new(mapwidth)
@@ -26,6 +25,7 @@ function cam:followplayer(playerx)
 --https://stackoverflow.com/questions/9997006/slick2d-and-jbox2d-how-to-draw?answertab=votes#tab-top
 --offsetmaxx = world_size_x - viewport_size_x
 --offsetminx = 0
+-- no idea why subtract from world width
  self.x=playerx-self.mapwidth
  -- these sonditions are so that camera doesnt go out
  --of bounds. 16 is length of map u are currently viewing
@@ -33,8 +33,8 @@ function cam:followplayer(playerx)
  if self.x<0 then
   self.x=0
  end
- if self.x>(self.mapwidth-16) then
-   self.x = self.mapwidth-16
+ if self.x>(self.mapwidth-16)*8 then
+   self.x = (self.mapwidth-16)*8
  end
  camera(self.x,0)
 end
@@ -56,7 +56,7 @@ end
 
 function _update()
  player1:move()
-
+ checkwallcollision(player1)
 end
 
 function _draw()
@@ -64,9 +64,23 @@ function _draw()
  cls()
  mycam:followplayer(player1:getx())
  player1:draw()
- draw_debug()
+
  --draw in layers
  map(0,0,0,0,24,64)
+ draw_debug()
+
+end
+
+--collision code
+function checkwallcollision(actor)
+ -- do something
+ local xoffset=0
+ local vector1 = mget(actor.x+1,actor.y+0)
+ if fget(vector1,0) then
+  actor.x=actor.startx
+ end
+
+
 
 end
 
