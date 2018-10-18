@@ -62,6 +62,7 @@ end
 
 function _update()
  player1:move()
+ player1:update()
  checkwallcollision(player1)
 end
 
@@ -214,6 +215,13 @@ function player:collide(actor)
   self.lives-=1
   self.invuln=true
   self.invtimer=100
+ end
+end
+
+function player:update()
+ self.invtimer=-1
+ if self.invtimer <= 0 then
+  self.invuln = false
  end
 end
 
