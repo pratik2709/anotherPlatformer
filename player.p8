@@ -11,8 +11,10 @@ function draw_debug()
  local xoffset=0
  if player1.dx>0 then xoffset=7 end 
   print(player1:getx(),player1:getx(),0,11)
- print(mget((player1.x+xoffset),(player1.y+7)),player1:getx(),5,11)
- print(fget(mget((player1.x+xoffset),(player1.y+7)),0),player1:getx(),10,11)  
+ print(mget((player1.x+xoffset)/8,(player1.y+7)/8),player1:getx()
+  ,5,11)
+ print(fget(mget((player1.x+xoffset)/8,(player1.y+7)/8),0)
+  ,player1:getx(),10,11)  
 end
 
 function cam:new(mapwidth)
@@ -206,6 +208,32 @@ function player:draw()
 
 end
 
+function player:collide(actor)
+ if actorcollide(self, actor)
+  and not self.invuln then
+  self.lives-=1
+  self.invuln=true
+  self.invtimer=100
+ end
+end
+
+--collision related
+function intersect(min1, max1, min2, max2)
+ return max(min1, max1) > min(min2, max2) and 
+        min(min1, max1) < max(min2,max2)
+end
+
+function actorcollide(actor1, actor2)
+ return intersect(actor1.x, actor1.x+8, 
+  actor2.x, actor2.x+8) and 
+ intersect(actor1.y, actor1.y+8, 
+  actor2.y, actor2.y+8)
+end
+
+--animation
+function anim(actor)
+ -- do something
+end
 
 
 __gfx__
