@@ -121,6 +121,22 @@ function checkwallcollision(actor)
   actor.jumptimer=0
   end
  end
+
+ --ceiling
+ --top corners
+ vertex1=mget((actor.x)/8,(actor.y)/8)
+ vertex2=mget((actor.x+7)/8,(actor.y)/8)
+
+ if actor.dy<0 then
+  if fget(vertex1,0) or fget(vertex2,0)
+   then
+   actor.y = flr((actor.y+8)/8)
+   --halt upward direction
+   actor.dy = 0
+   --todo: why needed?
+   actor.x=actor.startx
+  end
+ end
 end
 
 function player:new(x, y)
