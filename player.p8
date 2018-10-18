@@ -14,7 +14,8 @@ function draw_debug()
  print(mget((player1.x+xoffset)/8,(player1.y+7)/8),player1:getx()
   ,5,11)
  print(fget(mget((player1.x+xoffset)/8,(player1.y+7)/8),0)
-  ,player1:getx(),10,11)  
+  ,player1:getx(),10,11)
+ print(player1.dx,player1:getx(),15,11)     
 end
 
 function cam:new(mapwidth)
@@ -80,11 +81,18 @@ end
 
 --collision code
 function checkwallcollision(actor)
- -- do something
+-- xoffset 
+-- seems to be needed to determine left or right side
  local xoffset=0
- local vector1 = mget((actor.x+xoffset)/8,(actor.y+7)/8)
+ if actor.dx > 0 then
+  xoffset = 7
+ end
 
- if fget(vector1,0) then
+ -- rightmost part of the sprite
+ local vector1 = mget((actor.x+xoffset)/8,(actor.y+7)/8)
+ local vector2 = mget((actor.x+xoffset)/8, (actor.y)/8)
+
+ if fget(vector1,0) or fget(vector2,0) then
   actor.x=actor.startx
  end
 
@@ -104,7 +112,7 @@ function checkwallcollision(actor)
   --look for a floor
   if fget(vertex1,0) or fget(vertex2,0) then
   -- place the actor on top of the tile
-  -- why multiply by 8 ??
+  -- todo: why multiply by 8 ??
   actor.y = flr((actor.y)/8)
   --halt velocity
   actor.dy=0
