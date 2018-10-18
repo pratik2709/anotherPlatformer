@@ -113,7 +113,7 @@ function checkwallcollision(actor)
   if fget(vertex1,0) or fget(vertex2,0) then
   -- place the actor on top of the tile
   -- todo: why multiply by 8 ??
-  actor.y = flr((actor.y)/8)
+  actor.y = flr((actor.y)/8)*8
   --halt velocity
   actor.dy=0
   --enable jump again
@@ -130,7 +130,7 @@ function checkwallcollision(actor)
  if actor.dy<0 then
   if fget(vertex1,0) or fget(vertex2,0)
    then
-   actor.y = flr((actor.y+8)/8)
+   actor.y = flr((actor.y+8)/8)*8
    --halt upward direction
    actor.dy = 0
    --todo: why needed?
@@ -178,8 +178,8 @@ end
 function updatelocation(actor)
  -- do something
  actor.x += actor.dx
-
- -- actor.dy += globals.gravity
+ --activate gravity
+ actor.dy += globals.gravity
 
  --fall
  actor.y += actor.dy
@@ -248,11 +248,18 @@ function player:draw()
   --draw the sprite either left or right
   if not self.isgrounded then
    if self.isfacingright then
-    --http://pico-8.wikia.com/wiki/spr
     spr(0,self.x, self.y, 1, 1, false)
    else
     spr(0,self.x, self.y, 1, 1, true)
    end
+  elseif self.dx>=0 then
+   if self.isfacingright then
+    spr(0,self.x, self.y, 1, 1, false)
+   else
+    spr(0,self.x, self.y, 1, 1, true)
+   end
+  else
+    spr(0,self.x, self.y, 1, 1, true)
   end
  end
 
