@@ -88,6 +88,31 @@ function checkwallcollision(actor)
   actor.x=actor.startx
  end
 
+ --bottom corners of an object
+ -- |   |
+ -- |   |
+ -- .   .   dots represent bottom corners
+ -- divide by 8 to find the cell numer ?
+ local vertex1=mget((actor.x)/8,(actor.y+8)/8)
+ local vertex2=mget((actor.x+7)/8,(actor.y+8)/8)
+
+ --by default actor is assumed to be floating
+ actor.isgrounded = false
+
+ --moving downward check for floors
+ if actor.dy>=0 then
+  --look for a floor
+  if fget(vertex1,0) or fget(vertex2,0) then
+  -- place the actor on top of the tile
+  -- why multiply by 8 ??
+  actor.y = flr((actor.y)/8)
+  --halt velocity
+  actor.dy=0
+  --enable jump again
+  actor.isgrounded=true
+  actor.jumptimer=0
+  end
+ end
 end
 
 function player:new(x, y)
