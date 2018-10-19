@@ -20,3 +20,11 @@ if(player1.x < player2.x + player2.width &&
 {
     System.out.println("Collision Detected");
 }
+
+Mget(cellx, celly): sprite number of a cell on the map
+
+fget(spritenumber, flag_index): set flags for a particular sprite(total 8)
+
+flr(): floor of a number
+
+
