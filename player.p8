@@ -37,17 +37,29 @@ function cam:followplayer(playerx, playery)
 --offsetminx = 0
 -- no idea why subtract from world width
  self.x=playerx-self.mapwidth
- self.y=playery-(self.mapheight+100)
+ self.y=playery-(self.mapheight*2)
  -- these sonditions are so that camera doesnt go out
  --of bounds. 16 is length of map u are currently viewing
  --in the viewport
+ -- leftmost bound for x
  if self.x<0 then
   self.x=0
  end
 
+ if self.y<0 then
+  self.y=0
+ end
+
+--right-most bound for x
  if self.x>(self.mapwidth-16)*8 then
    self.x = (self.mapwidth-16)*8
  end
+
+ if self.y>(self.mapheight+19) then
+  --19 is the lowest point
+   self.y = self.mapheight+19
+ end
+
  camera(self.x,self.y)
 end
 
