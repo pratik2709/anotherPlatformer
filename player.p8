@@ -10,40 +10,45 @@ function draw_debug()
  -- do something
  local xoffset=0
  if player1.dx>0 then xoffset=7 end 
-  print(player1:getx(),player1:getx(),0,11)
+  print(player1:getx(),player1:getx(),player1.y-mapheight,11)
  print(mget((player1.x+xoffset)/8,(player1.y+7)/8),player1:getx()
   ,5,11)
  print(fget(mget((player1.x+xoffset)/8,(player1.y+7)/8),0)
-  ,player1:getx(),10,11)
- print(player1.dx,player1:getx(),15,11)     
+  ,player1:getx(),player1.y,11)
+ print(player1.dx,player1:getx(),player1.y,11)
+ print(player1.y,player1:getx(),player1.y,11)       
 end
 
-function cam:new(mapwidth)
+function cam:new(mapwidth, mapheight)
  local o = {}
  setmetatable(o,self)
  self.__index=self
  o.x = 0
  o.mapwidth=mapwidth
+ o.y = 0
+ o.mapheight=mapheight
  return o
 end
 
-function cam:followplayer(playerx)
+function cam:followplayer(playerx, playery)
 --https://gamedev.stackexchange.com/questions/44256/how-to-add-a-scrolling-camera-to-a-2d-java-game
 --https://stackoverflow.com/questions/9997006/slick2d-and-jbox2d-how-to-draw?answertab=votes#tab-top
 --offsetmaxx = world_size_x - viewport_size_x
 --offsetminx = 0
 -- no idea why subtract from world width
  self.x=playerx-self.mapwidth
+ self.y=playery-(self.mapheight+100)
  -- these sonditions are so that camera doesnt go out
  --of bounds. 16 is length of map u are currently viewing
  --in the viewport
  if self.x<0 then
   self.x=0
  end
+
  if self.x>(self.mapwidth-16)*8 then
    self.x = (self.mapwidth-16)*8
  end
- camera(self.x,0)
+ camera(self.x,self.y)
 end
 
 function cam:getx()
@@ -57,7 +62,7 @@ end
 function _init()
  mapwidth = 64
  mapheight = 16
- mycam = cam:new(mapwidth)
+ mycam = cam:new(mapwidth, mapheight)
  player1 = player:new(32,72)
 end
 
@@ -70,7 +75,7 @@ end
 function _draw()
  -- draw code
  cls()
- mycam:followplayer(player1:getx())
+ mycam:followplayer(player1:getx(), player1.y)
  player1:draw()
 
  --draw in layers
