@@ -10,13 +10,26 @@ function draw_debug()
  -- do something
  local xoffset=0
  if player1.dx>0 then xoffset=7 end 
-  print(player1:getx(),player1:getx(),player1.y-mapheight,11)
- print(mget((player1.x+xoffset)/8,(player1.y+7)/8),player1:getx()
-  ,5,11)
- print(fget(mget((player1.x+xoffset)/8,(player1.y+7)/8),0)
-  ,player1:getx(),player1.y,11)
- print(player1.dx,player1:getx(),player1.y,11)
- print(player1.y,player1:getx(),player1.y,11)       
+ local vertex3=mget((player1.x+8)/8,(player1.y)/8)
+ local vertex4=mget((player1.x+8)/8,(player1.y+8)/8)
+ --code for wall climb
+ if player1.dy < 0 then
+
+  print(fget(vertex3,0),player1:getx(),(player1.y-mapheight)-10,11)
+  print(fget(vertex4,0),player1:getx(),(player1.y-mapheight)-20,11)
+
+  if fget(vertex3,1) or fget(vertex4,1)
+  then
+   print("god",player1:getx(),player1.y-mapheight,11)
+  end 
+ end
+  -- print(player1:getx(),player1:getx(),(player1.y-mapheight)-10,11)
+ -- print(mget((player1.x+xoffset)/8,(player1.y+7)/8),player1:getx()
+ --  ,5,11)
+ -- print(fget(mget((player1.x+xoffset)/8,(player1.y+7)/8),0)
+ --  ,player1:getx(),player1.y,11)
+ -- print(player1.dx,player1:getx(),0,11)
+ -- print(player1.y,player1:getx(),0,11)       
 end
 
 function cam:new(mapwidth, mapheight)
@@ -144,6 +157,10 @@ function checkwallcollision(actor)
  vertex1=mget((actor.x)/8,(actor.y)/8)
  vertex2=mget((actor.x+7)/8,(actor.y)/8)
 
+ --rightmost corners ()
+ local vertex3=mget((actor.x+8)/8,(actor.y)/8)
+ local vertex4=mget((actor.x+8)/8,(actor.y+8)/8)
+
  if actor.dy<0 then
   if fget(vertex1,0) or fget(vertex2,0)
    then
@@ -153,18 +170,15 @@ function checkwallcollision(actor)
    --todo: why needed?
    actor.x=actor.startx
   end
- end
 
---rightmost corners ()
- local vertex3=mget((actor.x+7)/8,(actor.y)/8)
- local vertex4=mget((actor.x+7)/8,(actor.y+8)/8)
- --code for wall climb
- if actor.dy < 0 then
   if fget(vertex3,1) or fget(vertex4,1)
   then
    --halt the upward trajectory
-   actor.dy = 0
-  end
+   actor.dy -= 4
+   -- actor.x=actor.startx + 1
+   -- actor.y=actor.starty + 16
+   -- actor.wall_climb = true
+  end  
  end
 
 end
@@ -189,6 +203,7 @@ function player:new(x, y)
 
  o.bounce = false
  o.flash = false
+ o.wall_climb = false
 
  o.bad = false
  o.invuln = false
@@ -471,7 +486,7 @@ a0a00aa0a0a000000aa0a0a0a0a00a000000a0a0a0a0aaa000000aa0aa00aaa00000a00000a00000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
 __gff__
-0001000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0001000300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 0101010101010101010101010101010101010101010101010101010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
