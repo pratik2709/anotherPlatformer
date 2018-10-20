@@ -134,22 +134,32 @@ function checkwallcollision(actor)
  local vertex1=mget((actor.x)/8,(actor.y+8)/8)
  local vertex2=mget((actor.x+7)/8,(actor.y+8)/8)
 
+
  --by default actor is assumed to be floating
  actor.isgrounded = false
 
  --moving downward check for floors
- if actor.dy>=0 then
+ if actor.dy>=0 and not actor.isgrounded  then
   --look for a floor
   if fget(vertex1,0) or fget(vertex2,0) then
-  -- place the actor on top of the tile
-  -- todo: why multiply by 8 ??
-  actor.y = flr((actor.y)/8)*8
-  --halt velocity
-  actor.dy=0
-  --enable jump again
-  actor.isgrounded=true
-  actor.jumptimer=0
+   -- place the actor on top of the tile
+   -- todo: why multiply by 8 ??
+   actor.y = flr((actor.y)/8)*8
+   --halt velocity
+   actor.dy=0
+   --enable jump again
+   actor.isgrounded=true
+   actor.jumptimer=0
   end
+
+  if actor.wall_climb
+  then
+   actor.dy=0
+   actor.y = flr((actor.y)/8)*8
+   --enable jump again
+   actor.isgrounded=true
+   actor.jumptimer=0  
+  end  
  end
 
  --ceiling
@@ -157,10 +167,11 @@ function checkwallcollision(actor)
  vertex1=mget((actor.x)/8,(actor.y)/8)
  vertex2=mget((actor.x+7)/8,(actor.y)/8)
 
- --rightmost corners ()
+  --rightmost corners ()
  local vertex3=mget((actor.x+8)/8,(actor.y)/8)
  local vertex4=mget((actor.x+8)/8,(actor.y+8)/8)
 
+-- moving up
  if actor.dy<0 then
   if fget(vertex1,0) or fget(vertex2,0)
    then
@@ -171,13 +182,17 @@ function checkwallcollision(actor)
    actor.x=actor.startx
   end
 
-  if fget(vertex3,1) or fget(vertex4,1)
+  if fget(vertex4,1)
   then
    --halt the upward trajectory
-   actor.dy -= 4
+   -- actor.dy -= 1
+   actor.dy = 0
+   actor.x=actor.startx
+   actor.y=actor.starty
+   actor.isgrounded = true
+   actor.jumptimer=0
    -- actor.x=actor.startx + 1
-   -- actor.y=actor.starty + 16
-   -- actor.wall_climb = true
+   actor.wall_climb = true
   end  
  end
 
