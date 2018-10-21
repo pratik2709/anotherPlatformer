@@ -13,23 +13,31 @@ function draw_debug()
  local vertex3=mget((player1.x+8)/8,(player1.y)/8)
  local vertex4=mget((player1.x+8)/8,(player1.y+8)/8)
  --code for wall climb
- if player1.dy < 0 then
+ -- if player1.dy < 0 then
 
-  print(fget(vertex3,0),player1:getx(),(player1.y-mapheight)-10,11)
-  print(fget(vertex4,0),player1:getx(),(player1.y-mapheight)-20,11)
+ --  print(fget(vertex3,0),player1:getx(),(player1.y-mapheight)-10,11)
+ --  print(fget(vertex4,0),player1:getx(),(player1.y-mapheight)-20,11)
 
-  if fget(vertex3,1) or fget(vertex4,1)
-  then
-   print("god",player1:getx(),player1.y-mapheight,11)
-  end 
- end
+ --  if fget(vertex3,1) or fget(vertex4,1)
+ --  then
+ --   print("god",player1:getx(),player1.y-mapheight,11)
+ --  end 
+ -- end
   -- print(player1:getx(),player1:getx(),(player1.y-mapheight)-10,11)
  -- print(mget((player1.x+xoffset)/8,(player1.y+7)/8),player1:getx()
  --  ,5,11)
  -- print(fget(mget((player1.x+xoffset)/8,(player1.y+7)/8),0)
  --  ,player1:getx(),player1.y,11)
  -- print(player1.dx,player1:getx(),0,11)
- -- print(player1.y,player1:getx(),0,11)       
+ -- print(player1.y,player1:getx(),0,11)
+ -- if btn(4) and player1.isgrounded 
+ --  and player1.jumptimer == 0 then
+ --  print(player1.dy, player1:getx(),
+ --   (player1.y-mapheight)-10,11)
+ -- end
+ print(player1.wall_climb,player1:getx(),(player1.y-mapheight)-10,11)
+ -- print(player1.jumptimer,player1:getx(),(player1.y-mapheight)-20,11)
+
 end
 
 function cam:new(mapwidth, mapheight)
@@ -140,6 +148,7 @@ function checkwallcollision(actor)
 
  --moving downward check for floors
  if actor.dy>=0 and not actor.isgrounded  then
+  fset(3,1,true)
   --look for a floor
   if fget(vertex1,0) or fget(vertex2,0) then
    -- place the actor on top of the tile
@@ -155,10 +164,11 @@ function checkwallcollision(actor)
   if actor.wall_climb
   then
    actor.dy=0
-   actor.y = flr((actor.y)/8)*8
+   actor.y = actor.starty
    --enable jump again
    actor.isgrounded=true
    actor.jumptimer=0  
+   -- fset(3,1,false)
   end  
  end
 
@@ -173,27 +183,28 @@ function checkwallcollision(actor)
 
 -- moving up
  if actor.dy<0 then
+  actor.wall_climb = false
   if fget(vertex1,0) or fget(vertex2,0)
    then
-   actor.y = flr((actor.y+8)/8)*8
+   actor.y = ceil((actor.y+8)/8)*8
    --halt upward direction
    actor.dy = 0
    --todo: why needed?
    actor.x=actor.startx
   end
 
-  if fget(vertex4,1)
+  if fget(vertex4,1) and not actor.wall_climb
   then
    --halt the upward trajectory
    -- actor.dy -= 1
    actor.dy = 0
+   -- actor.isgrounded=true
+   -- actor.jumptimer=0    
    actor.x=actor.startx
    actor.y=actor.starty
-   actor.isgrounded = true
-   actor.jumptimer=0
-   -- actor.x=actor.startx + 1
    actor.wall_climb = true
-  end  
+  end 
+
  end
 
 end
@@ -272,7 +283,12 @@ function player:move()
  self.starty = self.y
 
  --jump code
- if btn(4) and self.isgrounded
+ if btn(4) and self.wall_climb then
+  self:jump()
+  self.jumppressed = true
+  self.wall_climb = false
+  fset(3,1,false)
+ elseif btn(4) and self.isgrounded
  and self.jumptimer == 0 then
   self:jump()
   self.jumppressed = true
@@ -286,7 +302,9 @@ function player:move()
  elseif not btn(4) then
   -- elseif code
   self.jumppressed = false
+
  end
+
 
  --left/right movement set it 0 ?
  self.dx = 0
