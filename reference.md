@@ -27,4 +27,7 @@ fget(spritenumber, flag_index): set flags for a particular sprite(total 8)
 
 flr(): floor of a number
 
+sgn( [number] )
+Returns the sign of a number, 1 for positive, -1 for negative
+
 
