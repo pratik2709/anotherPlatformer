@@ -30,4 +30,9 @@ flr(): floor of a number
 sgn( [number] )
 Returns the sign of a number, 1 for positive, -1 for negative
 
+spr( n, x, y, [w,] [h,] [flip_x,] [flip_y] )
+Draw sprite
+
+https://www.lexaloffle.com/bbs/?tid=3115
+Animation function
 
