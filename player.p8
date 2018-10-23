@@ -372,10 +372,22 @@ function actorcollide(actor1, actor2)
   actor2.y, actor2.y+8)
 end
 
---animation
+-- object, starting frame, number of frames,
+-- animation speed, flip
 function anim(actor, start_frame, number_of_frames,
  anim_speed, flipper)
- -- do something
+ if(not actor.current_tile) actor.current_tile = 0
+ if(not actor.starting_tile) actor.starting_tile = 0
+ actor.current_tile+=1
+ if(actor.current_tile%(30/anim_speed)==0) then
+  actor.starting_tile+=1
+  if(actor.starting_tile==number_of_frames) then
+   actor.starting_tile = 0
+  end
+ end 
+ actor.frame = start_frame + actor.
+ spr(actor.frame,actor.x,actor.y,1,1,flipper)
+
 end
 
 
