@@ -103,6 +103,7 @@ function _update()
  player1:move()
  player1:update()
  checkwallcollision(player1)
+ 
 end
 
 function _draw()
@@ -130,7 +131,7 @@ function checkwallcollision(actor)
  local vector1 = mget((actor.x+xoffset)/8,(actor.y+7)/8)
  local vector2 = mget((actor.x+xoffset)/8, (actor.y)/8)
 
- if fget(vector1,0) or fget(vector2,0) then
+ if collide(player1, player1.dx, player1.dy) then
   actor.x=actor.startx
  end
 
@@ -262,6 +263,7 @@ function collide(actor, dx, dy)
  local tile1=mget(x1/8,y1/8)
  local tile2=mget(x2/8,y2/8)
 
+ --standard collisions
  if tile1==1 or tile2==1 then
   return true
  end
