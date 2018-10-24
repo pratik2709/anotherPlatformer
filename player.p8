@@ -238,6 +238,35 @@ function player:new(x, y)
  return o
 end
 
+function collide(actor, dx, dy)
+ local x1,x2,y1,y2
+
+ if dx!=0 then
+  x1=actor.x + sgn(dx) * 8
+  x2=x1
+  y1=actor.y - 8
+  y2=actor.y + 8
+ else 
+  y1=actor.y+sgn(dy)*8
+  y2=y1
+  x1=actor.x-8
+  x2=actor.x+8
+ end
+
+ --add potential movement to test points
+ x1+=dx
+ x2+=dx
+ y1+=dy
+ y2+=dy
+
+ local tile1=mget(x1/8,y1/8)
+ local tile2=mget(x2/8,y2/8)
+
+ if tile1==1 or tile2==1 then
+  return true
+ end
+end
+
 function player:getx()
  return self.x
 end
