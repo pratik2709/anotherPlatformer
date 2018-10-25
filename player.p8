@@ -103,7 +103,7 @@ function _update()
  player1:move()
  player1:update()
  checkwallcollision(player1)
- 
+
 end
 
 function _draw()
@@ -134,6 +134,10 @@ function checkwallcollision(actor)
  if collide(player1, player1.dx, player1.dy) then
   actor.x=actor.startx
  end
+
+ --  if fget(vector1,0) or fget(vector2,0) then
+ --  actor.x=actor.startx
+ -- end
 
  --bottom corners of an object
  -- |   |
@@ -243,15 +247,15 @@ function collide(actor, dx, dy)
  local x1,x2,y1,y2
 
  if dx!=0 then
-  x1=actor.x + sgn(dx) * 8
-  x2=x1
+  x1=actor.x + sgn(dx) * 7
+  x2=actor.x
   y1=actor.y - 8
   y2=actor.y + 8
  else 
   y1=actor.y+sgn(dy)*8
-  y2=y1
-  x1=actor.x-8
-  x2=actor.x+8
+  y2=actor.y
+  x1=actor.x-7
+  x2=actor.x+7
  end
 
  --add potential movement to test points
