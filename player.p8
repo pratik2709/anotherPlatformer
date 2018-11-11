@@ -2,14 +2,15 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 globals = {
- gravity = 0.2
+ gravity = 0.2,
+ dt = 0.5
 }
 player = {}
 cam = {}
 function draw_debug()
  -- do something
  local xoffset=0
- if player1.dx>0 then xoffset=7 end 
+ if player1.dx>0 then xoffset=7 end
  local vertex3=mget((player1.x+8)/8,(player1.y)/8)
  local vertex4=mget((player1.x+8)/8,(player1.y+8)/8)
  --code for wall climb
@@ -21,7 +22,7 @@ function draw_debug()
  --  if fget(vertex3,1) or fget(vertex4,1)
  --  then
  --   print("god",player1:getx(),player1.y-mapheight,11)
- --  end 
+ --  end
  -- end
   -- print(player1:getx(),player1:getx(),(player1.y-mapheight)-10,11)
  -- print(mget((player1.x+xoffset)/8,(player1.y+7)/8),player1:getx()
@@ -30,7 +31,7 @@ function draw_debug()
  --  ,player1:getx(),player1.y,11)
  -- print(player1.dx,player1:getx(),0,11)
  -- print(player1.y,player1:getx(),0,11)
- -- if btn(4) and player1.isgrounded 
+ -- if btn(4) and player1.isgrounded
  --  and player1.jumptimer == 0 then
  --  print(player1.dy, player1:getx(),
  --   (player1.y-mapheight)-10,11)
@@ -118,99 +119,185 @@ function _draw()
 
 end
 
+function iswall(tile)
+  if(tile==1) then
+    return true
+  end
+end
+
+function collide(agent, vx, vy, toponly)
+  local x1,x2,y1,y2
+  if vx!=0 then
+    x1=agent.x+sgn(vx)*agent.w
+    x2=x1
+    y1=agent.y-agent.h
+    y2=agent.y+agent.h
+  else
+    y1=agent.y+sgn(vy)*agent.h
+    y2=y1
+    x1=agent.x-agent.w
+    x2=agent.x+agent.w
+  end
+
+  --adding potential movements
+  x1+=vx
+  x2+=vx
+  y1+=vy
+  y2+=vy
+
+  --map tiles
+  local tile1=mget(x1/8,y1/8)
+  local tile2=mget(x2/8,y2/8)
+
+  if toponly then
+    if iswall(tile1) then
+      return true
+    end
+  else
+    if iswall(tile1) or iswall(tile2) then
+      return true
+    end
+  end
+
+  --no hits
+  return false
+end
+
+
 --collision code
 function checkwallcollision(actor)
--- xoffset 
+
+  local steps = abs(actor.dx*globals.dt)
+  for i=0,steps do
+    local d=min(1,steps-i)
+
+    --x axis collision
+    if collide(actor, sgn(actor.dx)*d,0) then
+      actor.dx=0
+      actor.x=actor.startx
+      break
+    else
+      actor.x+=sgn(actor.dx)*d
+    end
+  end
+
+  --y axis collision
+  steps=abs(actor.dy*globals.dt)
+  for i=0,steps do
+    local d=min(1,steps-i)
+    if collide(actor,0,sgn(actor.dy)*d) then
+      -- if actor.dy>1 then
+           actor.y = flr((actor.y)/8)*8
+           --halt velocity
+           actor.dy=0
+           -- --enable jump again
+           -- actor.isgrounded=true
+           -- actor.jumptimer=0
+      -- end
+      break
+    else
+      actor.y+=sgn(actor.dy)*d
+    end
+  end
+
+  --standing on something code
+  if collide(actor,0,1) then
+    actor.isgrounded=true
+    actor.jumptimer=0
+  end
+
+  actor.dx*=.98
+
+
+-- xoffset
 -- seems to be needed to determine left or right side
- local xoffset=0
- if actor.dx > 0 then
-  xoffset = 7
- end
-
- -- rightmost part of the sprite
- local vector1 = mget((actor.x+xoffset)/8,(actor.y+7)/8)
- local vector2 = mget((actor.x+xoffset)/8, (actor.y)/8)
-
- -- if collide(player1, player1.dx, player1.dy) then
- --  actor.x=actor.startx
+ -- local xoffset=0
+ -- if actor.dx > 0 then
+ --  xoffset = 7
  -- end
-
-  if fget(vector1,0) or fget(vector2,0) then
-  actor.x=actor.startx
- end
-
- --bottom corners of an object
- -- |   |
- -- |   |
- -- .   .   dots represent bottom corners
- -- divide by 8 to find the cell numer ?
- local vertex1=mget((actor.x)/8,(actor.y+8)/8)
- local vertex2=mget((actor.x+7)/8,(actor.y+8)/8)
+ --
+ -- -- rightmost part of the sprite
+ -- local vector1 = mget((actor.x+xoffset)/8,(actor.y+7)/8)
+ -- local vector2 = mget((actor.x+xoffset)/8, (actor.y)/8)
 
 
- --by default actor is assumed to be floating
- actor.isgrounded = false
 
- --moving downward check for floors
- if actor.dy>=0 and not actor.isgrounded  then
-  fset(3,1,true)
-  --look for a floor
-  if fget(vertex1,0) or fget(vertex2,0) then
-   -- place the actor on top of the tile
-   -- todo: why multiply by 8 ??
-   actor.y = flr((actor.y)/8)*8
-   --halt velocity
-   actor.dy=0
-   --enable jump again
-   actor.isgrounded=true
-   actor.jumptimer=0
-  end
-
-  if actor.wall_climb
-  then
-   actor.dy=0
-   actor.y = actor.starty
-   --enable jump again
-   actor.isgrounded=true
-   actor.jumptimer=0  
-   -- fset(3,1,false)
-  end  
- end
-
- --ceiling
- --top corners
- vertex1=mget((actor.x)/8,(actor.y)/8)
- vertex2=mget((actor.x+7)/8,(actor.y)/8)
-
-  --rightmost corners ()
- local vertex3=mget((actor.x+8)/8,(actor.y)/8)
- local vertex4=mget((actor.x+8)/8,(actor.y+8)/8)
-
--- moving up
- if actor.dy<0 then
-  actor.wall_climb = false
-  if fget(vertex1,0) or fget(vertex2,0)
-   then
-   actor.y = ceil((actor.y+8)/8)*8
-   --halt upward direction
-   actor.dy = 0
-   --todo: why needed?
-   actor.x=actor.startx
-  end
-
-  if fget(vertex4,1) and not actor.wall_climb
-  then
-   --halt the upward trajectory
-   -- actor.dy -= 1
-   actor.dy = 0
-   -- actor.isgrounded=true
-   -- actor.jumptimer=0    
-   actor.x=actor.startx
-   actor.y=actor.starty
-   actor.wall_climb = true
-  end 
-
- end
+--   -- if fget(vector1,0) or fget(vector2,0) then
+--   -- actor.x=actor.startx
+--   -- end
+--
+--  --bottom corners of an object
+--  -- |   |
+--  -- |   |
+--  -- .   .   dots represent bottom corners
+--  -- divide by 8 to find the cell numer ?
+--  local vertex1=mget((actor.x)/8,(actor.y+8)/8)
+--  local vertex2=mget((actor.x+7)/8,(actor.y+8)/8)
+--
+--
+--  --by default actor is assumed to be floating
+--  actor.isgrounded = false
+--
+--  --moving downward check for floors
+--  if actor.dy>=0 and not actor.isgrounded  then
+--   fset(3,1,true)
+--   --look for a floor
+--   if fget(vertex1,0) or fget(vertex2,0) then
+--    -- place the actor on top of the tile
+--    -- todo: why multiply by 8 ??
+--    actor.y = flr((actor.y)/8)*8
+--    --halt velocity
+--    actor.dy=0
+--    --enable jump again
+--    actor.isgrounded=true
+--    actor.jumptimer=0
+--   end
+--
+--   if actor.wall_climb
+--   then
+--    actor.dy=0
+--    actor.y = actor.starty
+--    --enable jump again
+--    actor.isgrounded=true
+--    actor.jumptimer=0
+--    -- fset(3,1,false)
+--   end
+--  end
+--
+--  --ceiling
+--  --top corners
+--  vertex1=mget((actor.x)/8,(actor.y)/8)
+--  vertex2=mget((actor.x+7)/8,(actor.y)/8)
+--
+--   --rightmost corners ()
+--  local vertex3=mget((actor.x+8)/8,(actor.y)/8)
+--  local vertex4=mget((actor.x+8)/8,(actor.y+8)/8)
+--
+-- -- moving up
+--  if actor.dy<0 then
+--   actor.wall_climb = false
+--   if fget(vertex1,0) or fget(vertex2,0)
+--    then
+--    actor.y = ceil((actor.y+8)/8)*8
+--    --halt upward direction
+--    actor.dy = 0
+--    --todo: why needed?
+--    actor.x=actor.startx
+--   end
+--
+--   if fget(vertex4,1) and not actor.wall_climb
+--   then
+--    --halt the upward trajectory
+--    -- actor.dy -= 1
+--    actor.dy = 0
+--    -- actor.isgrounded=true
+--    -- actor.jumptimer=0
+--    actor.x=actor.startx
+--    actor.y=actor.starty
+--    actor.wall_climb = true
+--   end
+--
+--  end
 
 end
 
@@ -251,7 +338,7 @@ function collide(actor, dx, dy)
   x2=actor.x
   y1=actor.y - 8
   y2=actor.y + 8
- else 
+ else
   y1=actor.y+sgn(dy)*8
   y2=actor.y
   x1=actor.x-7
@@ -283,12 +370,12 @@ end
 
 function updatelocation(actor)
  -- do something
- actor.x += actor.dx
+ -- actor.x += actor.dx
  --activate gravity
  actor.dy += globals.gravity
 
  --fall
- actor.y += actor.dy
+ -- actor.y += actor.dy
 
 end
 
@@ -341,16 +428,21 @@ function player:move()
  end
 
 
- --left/right movement set it 0 ?
- self.dx = 0
- --left
  if btn(0) then
-  self:moveleft()
+   self.isfacingright=false
+   if self.dx>0 then
+     self.dx*=0.8
+   end
+   self.dx-=0.2*globals.dt
  end
---right
  if btn(1) then
-  self:moveright()
+   self.isfacingright=true
+   if self.dx<0 then
+     self.dx*=0.8
+   end
+   self.dx+=0.2*globals.dt
  end
+
  updatelocation(self)
 
 end
@@ -396,14 +488,14 @@ end
 
 --collision related
 function intersect(min1, max1, min2, max2)
- return max(min1, max1) > min(min2, max2) and 
+ return max(min1, max1) > min(min2, max2) and
         min(min1, max1) < max(min2,max2)
 end
 
 function actorcollide(actor1, actor2)
- return intersect(actor1.x, actor1.x+8, 
-  actor2.x, actor2.x+8) and 
- intersect(actor1.y, actor1.y+8, 
+ return intersect(actor1.x, actor1.x+8,
+  actor2.x, actor2.x+8) and
+ intersect(actor1.y, actor1.y+8,
   actor2.y, actor2.y+8)
 end
 
@@ -419,7 +511,7 @@ function anim(actor, start_frame, number_of_frames,
   if(actor.starting_tile==number_of_frames) then
    actor.starting_tile = 0
   end
- end 
+ end
  actor.frame = start_frame + actor.
  spr(actor.frame,actor.x,actor.y,1,1,flipper)
 
