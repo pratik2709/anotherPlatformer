@@ -131,13 +131,13 @@ function checkwallcollision(actor)
  local vector1 = mget((actor.x+xoffset)/8,(actor.y+7)/8)
  local vector2 = mget((actor.x+xoffset)/8, (actor.y)/8)
 
- if collide(player1, player1.dx, player1.dy) then
-  actor.x=actor.startx
- end
-
- --  if fget(vector1,0) or fget(vector2,0) then
+ -- if collide(player1, player1.dx, player1.dy) then
  --  actor.x=actor.startx
  -- end
+
+  if fget(vector1,0) or fget(vector2,0) then
+  actor.x=actor.startx
+ end
 
  --bottom corners of an object
  -- |   |

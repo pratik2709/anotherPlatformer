@@ -13,9 +13,9 @@ class player {
 
 If we had 2 instantiated player objects then we could perform AABB collision detection using the following:
 
-if(player1.x < player2.x + player2.width && 
+if(player1.x < player2.x + player2.width &&
     player1.x + player1.width > player2.x &&
-    player1.y < player2.y + player2.height && 
+    player1.y < player2.y + player2.height &&
     player1.y + player1.height > player2.y)
 {
     System.out.println("Collision Detected");
@@ -36,3 +36,11 @@ Draw sprite
 https://www.lexaloffle.com/bbs/?tid=3115
 Animation function
 
+btnp() implements a keyboard-like repeat mechanism: if the player holds the button for 15 frames, it registers as on again for one frame, then again every four frames after that. The frame counter resets when the player releases the button.
+http://pico-8.wikia.com/wiki/Btnp
+
+sspr()
+Sprite sheet treated as a 128x128 image, uses pixel locations
+
+
+map( celx, cely, sx, sy, celw, celh, [layer] )
