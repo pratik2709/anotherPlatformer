@@ -265,8 +265,8 @@ function player:new(x, y)
  o.y = y
  o.dx = 0
  o.dy = 0
- o.w=1
- o.h=2
+ o.w=7
+ o.h=7
 
  o.isgrounded = false
  o.isfacingright = true
@@ -316,6 +316,9 @@ function collide(actor, dx, dy)
  if iswall(tile1) or iswall(tile2) then
   return true
  end
+
+ --no hits
+ return false
 end
 
 function player:getx()
