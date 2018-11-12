@@ -125,43 +125,6 @@ function iswall(tile)
   end
 end
 
-function collide(agent, vx, vy, toponly)
-  local x1,x2,y1,y2
-  if vx!=0 then
-    x1=agent.x+sgn(vx)*agent.w
-    x2=x1
-    y1=agent.y-agent.h
-    y2=agent.y+agent.h
-  else
-    y1=agent.y+sgn(vy)*agent.h
-    y2=y1
-    x1=agent.x-agent.w
-    x2=agent.x+agent.w
-  end
-
-  --adding potential movements
-  x1+=vx
-  x2+=vx
-  y1+=vy
-  y2+=vy
-
-  --map tiles
-  local tile1=mget(x1/8,y1/8)
-  local tile2=mget(x2/8,y2/8)
-
-  if toponly then
-    if iswall(tile1) then
-      return true
-    end
-  else
-    if iswall(tile1) or iswall(tile2) then
-      return true
-    end
-  end
-
-  --no hits
-  return false
-end
 
 
 --collision code
@@ -174,7 +137,6 @@ function checkwallcollision(actor)
     --x axis collision
     if collide(actor, sgn(actor.dx)*d,0) then
       actor.dx=0
-      actor.x=actor.startx
       break
     else
       actor.x+=sgn(actor.dx)*d
@@ -186,14 +148,8 @@ function checkwallcollision(actor)
   for i=0,steps do
     local d=min(1,steps-i)
     if collide(actor,0,sgn(actor.dy)*d) then
-      -- if actor.dy>1 then
-           actor.y = flr((actor.y)/8)*8
-           --halt velocity
-           actor.dy=0
-           -- --enable jump again
-           -- actor.isgrounded=true
-           -- actor.jumptimer=0
-      -- end
+       --halt velocity
+       actor.dy=0
       break
     else
       actor.y+=sgn(actor.dy)*d
@@ -309,6 +265,8 @@ function player:new(x, y)
  o.y = y
  o.dx = 0
  o.dy = 0
+ o.w=1
+ o.h=2
 
  o.isgrounded = false
  o.isfacingright = true
@@ -334,15 +292,15 @@ function collide(actor, dx, dy)
  local x1,x2,y1,y2
 
  if dx!=0 then
-  x1=actor.x + sgn(dx) * 7
-  x2=actor.x
-  y1=actor.y - 8
-  y2=actor.y + 8
+  x1=actor.x + sgn(dx) * actor.w
+  x2=x1
+  y1=actor.y - actor.h
+  y2=actor.y + actor.h
  else
-  y1=actor.y+sgn(dy)*8
-  y2=actor.y
-  x1=actor.x-7
-  x2=actor.x+7
+  y1=actor.y+sgn(dy)*actor.h
+  y2=y1
+  x1=actor.x-actor.w
+  x2=actor.x+actor.w
  end
 
  --add potential movement to test points
@@ -355,7 +313,7 @@ function collide(actor, dx, dy)
  local tile2=mget(x2/8,y2/8)
 
  --standard collisions
- if tile1==1 or tile2==1 then
+ if iswall(tile1) or iswall(tile2) then
   return true
  end
 end
