@@ -36,9 +36,23 @@ function draw_debug()
  --  print(player1.dy, player1:getx(),
  --   (player1.y-mapheight)-10,11)
  -- end
- print(player1.wall_climb,player1:getx(),(player1.y-mapheight)-10,11)
+ -- print(player1.wall_climb,player1:getx(),(player1.y-mapheight)-10,11)
  -- print(player1.jumptimer,player1:getx(),(player1.y-mapheight)-20,11)
 
+ local steps = abs(player1.dx*globals.dt)
+ for i=0,steps do
+   local d=min(1,steps-i)
+
+   --x axis collision
+   if collide(player1, sgn(player1.dx)*d,0) then
+     print("True", player1:getx(),(player1.y-mapheight)-10,11)
+     break
+   else
+     print("False", player1:getx(),(player1.y-mapheight),11)
+   end
+ end
+ -- print(sgn(player1.dx), player1:getx(),(player1.y-mapheight)-10,11)
+ -- print(sgn(player1.dy), player1:getx(),(player1.y-mapheight)-20,11)
 end
 
 function cam:new(mapwidth, mapheight)
@@ -271,7 +285,7 @@ function player:new(x, y)
  o.isgrounded = false
  o.isfacingright = true
  o.jumppressed = false
- o.jumpvelocity = 2
+ o.jumpvelocity = 4
  o.jumptimer = 0
 
  o.score = 0
@@ -292,7 +306,12 @@ function collide(actor, dx, dy)
  local x1,x2,y1,y2
 
  if dx!=0 then
-  x1=actor.x + sgn(dx) * actor.w
+   if sgn(dx) != -1 then
+     x1=actor.x + sgn(dx) * actor.w
+   else
+     x1=actor.x
+   end
+
   x2=x1
   y1=actor.y - actor.h
   y2=actor.y + actor.h
@@ -391,17 +410,17 @@ function player:move()
 
  if btn(0) then
    self.isfacingright=false
-   if self.dx>0 then
-     self.dx*=0.8
-   end
-   self.dx-=0.2*globals.dt
+   -- if self.dx>0 then
+   --   self.dx*=0.8
+   -- end
+   self.dx-=1*globals.dt
  end
  if btn(1) then
    self.isfacingright=true
-   if self.dx<0 then
-     self.dx*=0.8
-   end
-   self.dx+=0.2*globals.dt
+   -- if self.dx<0 then
+   --   self.dx*=0.8
+   -- end
+   self.dx+=1*globals.dt
  end
 
  updatelocation(self)
