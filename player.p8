@@ -316,7 +316,11 @@ function collide(actor, dx, dy)
   y1=actor.y - actor.h
   y2=actor.y + actor.h
  else
-  y1=actor.y+sgn(dy)*actor.h
+   if sgn(dy) != -1 then
+     y1=actor.y+sgn(dy)*actor.h
+   else
+     y1=actor.y
+   end
   y2=y1
   x1=actor.x-actor.w
   x2=actor.x+actor.w
