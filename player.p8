@@ -178,8 +178,9 @@ function checkwallcollision(actor)
   --standing on something code
   if collide(actor,0,1) then
     actor.standing=true
-    actor.isgrounded=true
-    actor.jumptimer=0
+    actor.falltimer=0
+  else
+    actor.falltimer+=1
   end
 
   -- actor.sliding = false
@@ -219,7 +220,9 @@ function player:new(x, y)
  o.isfacingright = true
  o.jumppressed = false
  o.jumpvelocity = 4
- o.jumptimer = 0
+ o.falltimer = 0
+ o.landtimer = 0
+ o.hurtimer = 0
 
  o.score = 0
  o.lives = 3
@@ -296,26 +299,6 @@ function updatelocation(actor)
 
 end
 
-function player:moveleft()
- self.isfacingright = false
- self.dx = -2
-end
-
-function player:moveright()
- self.isfacingright = true
- self.dx = 2
-end
-
-function player:jump()
- self.dy=-self.jumpvelocity
- self.jumptimer+=1
-end
-
-function player:extendjump()
- self.dy=-self.jumpvelocity
- self.jumptimer+=1
-end
-
 function player:move()
  --storing start and end locations
  self.startx = self.x
@@ -330,7 +313,7 @@ function player:move()
  oholdjump=holdjump
 
  if hitjump then
-   if self.standing then
+   if self.standing or self.falltimer < 7 then
      self.dy = min(self.dy, -3)
    end
  end
