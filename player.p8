@@ -56,6 +56,9 @@ function draw_debug()
  -- if hitjump then
  --   print("True", player1:getx(),(player1.y-mapheight)-20,11)
  -- end
+ if(sgn(player1.dx) == -1) then
+ print("hello", player1:getx(),(player1.y-mapheight)-20,11)
+  end
 end
 
 function cam:new(mapwidth, mapheight)
@@ -245,7 +248,8 @@ function collide(actor, dx, dy)
    if sgn(dx) != -1 then
      x1=actor.x + sgn(dx) * actor.w
    else
-     x1=actor.x
+     -- left behaviour is wierd
+     x1=actor.x + -1* actor.w
    end
 
   x2=x1
@@ -288,16 +292,6 @@ function player:gety()
  return self.y
 end
 
-function updatelocation(actor)
- -- do something
- -- actor.x += actor.dx
- --activate gravity
- actor.dy += globals.gravity
-
- --fall
- -- actor.y += actor.dy
-
-end
 
 function player:move()
  --storing start and end locations
@@ -324,14 +318,14 @@ function player:move()
      if self.dx>0 then
        self.dx*=0.8
      end
-     self.dx-=1*globals.dt
+     self.dx-=0.5*globals.dt
    end
    if btn(1) then
      self.isfacingright=true
      if self.dx<0 then
        self.dx*=0.8
      end
-     self.dx+=1*globals.dt
+     self.dx+=0.5*globals.dt
    end
 
    if not btn(0) and not btn(1) then
@@ -357,7 +351,6 @@ function player:move()
 --   -- self.flipx=(self.slidedir==-1)
 -- end
 
- -- updatelocation(self)
 
 end
 
