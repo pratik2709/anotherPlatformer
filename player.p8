@@ -38,21 +38,24 @@ function draw_debug()
  -- end
  -- print(player1.wall_climb,player1:getx(),(player1.y-mapheight)-10,11)
  -- print(player1.jumptimer,player1:getx(),(player1.y-mapheight)-20,11)
-
- local steps = abs(player1.dx*globals.dt)
- for i=0,steps do
-   local d=min(1,steps-i)
-
-   --x axis collision
-   if collide(player1, sgn(player1.dx)*d,0) then
-     print("True", player1:getx(),(player1.y-mapheight)-10,11)
-     break
-   else
-     print("False", player1:getx(),(player1.y-mapheight),11)
-   end
- end
+-- print(sgn(player1.dx), player1:getx(),(player1.y-mapheight)-10,11)
+ -- local steps = abs(player1.dx*globals.dt)
+ -- for i=0,steps do
+ --   local d=min(1,steps-i)
+ --
+ --   --x axis collision
+ --   if collide(player1, 1*d,0) then
+ --     print("True", player1:getx(),(player1.y-mapheight)-10,11)
+ --     break
+ --   else
+ --     print("False", player1:getx(),(player1.y-mapheight),11)
+ --   end
+ -- end
  -- print(sgn(player1.dx), player1:getx(),(player1.y-mapheight)-10,11)
  -- print(sgn(player1.dy), player1:getx(),(player1.y-mapheight)-20,11)
+ -- if hitjump then
+ --   print("True", player1:getx(),(player1.y-mapheight)-20,11)
+ -- end
 end
 
 function cam:new(mapwidth, mapheight)
@@ -143,6 +146,8 @@ end
 
 --collision code
 function checkwallcollision(actor)
+  actor.standing = false
+  actor.dy += globals.gravity
 
   local steps = abs(actor.dx*globals.dt)
   for i=0,steps do
@@ -163,7 +168,7 @@ function checkwallcollision(actor)
     local d=min(1,steps-i)
     if collide(actor,0,sgn(actor.dy)*d) then
        --halt velocity
-       actor.dy=0
+      actor.dy=0
       break
     else
       actor.y+=sgn(actor.dy)*d
@@ -172,102 +177,29 @@ function checkwallcollision(actor)
 
   --standing on something code
   if collide(actor,0,1) then
+    actor.standing=true
     actor.isgrounded=true
     actor.jumptimer=0
   end
 
+  -- actor.sliding = false
+  -- if collide(actor,1,0) then
+  --   local tile=mget(actor.x/8+1, actor.y/8)
+  --   if(iswall(tile)) then
+  --     actor.sliding=true
+  --     -- actor.slidedir=-1
+  --     if(actor.dy>0) actor.dy*=0.97
+  --   end
+  -- elseif collide(actor,-1,0) then
+  --   local tile=mget(actor.x/8-1,actor.y/8)
+  --   if(iswall(tile)) then
+  --     actor.sliding=true
+  --     -- actor.slidedir=-1
+  --     if(actor.dy>0) actor.dy*=0.97
+  --   end
+  -- end
+
   actor.dx*=.98
-
-
--- xoffset
--- seems to be needed to determine left or right side
- -- local xoffset=0
- -- if actor.dx > 0 then
- --  xoffset = 7
- -- end
- --
- -- -- rightmost part of the sprite
- -- local vector1 = mget((actor.x+xoffset)/8,(actor.y+7)/8)
- -- local vector2 = mget((actor.x+xoffset)/8, (actor.y)/8)
-
-
-
---   -- if fget(vector1,0) or fget(vector2,0) then
---   -- actor.x=actor.startx
---   -- end
---
---  --bottom corners of an object
---  -- |   |
---  -- |   |
---  -- .   .   dots represent bottom corners
---  -- divide by 8 to find the cell numer ?
---  local vertex1=mget((actor.x)/8,(actor.y+8)/8)
---  local vertex2=mget((actor.x+7)/8,(actor.y+8)/8)
---
---
---  --by default actor is assumed to be floating
---  actor.isgrounded = false
---
---  --moving downward check for floors
---  if actor.dy>=0 and not actor.isgrounded  then
---   fset(3,1,true)
---   --look for a floor
---   if fget(vertex1,0) or fget(vertex2,0) then
---    -- place the actor on top of the tile
---    -- todo: why multiply by 8 ??
---    actor.y = flr((actor.y)/8)*8
---    --halt velocity
---    actor.dy=0
---    --enable jump again
---    actor.isgrounded=true
---    actor.jumptimer=0
---   end
---
---   if actor.wall_climb
---   then
---    actor.dy=0
---    actor.y = actor.starty
---    --enable jump again
---    actor.isgrounded=true
---    actor.jumptimer=0
---    -- fset(3,1,false)
---   end
---  end
---
---  --ceiling
---  --top corners
---  vertex1=mget((actor.x)/8,(actor.y)/8)
---  vertex2=mget((actor.x+7)/8,(actor.y)/8)
---
---   --rightmost corners ()
---  local vertex3=mget((actor.x+8)/8,(actor.y)/8)
---  local vertex4=mget((actor.x+8)/8,(actor.y+8)/8)
---
--- -- moving up
---  if actor.dy<0 then
---   actor.wall_climb = false
---   if fget(vertex1,0) or fget(vertex2,0)
---    then
---    actor.y = ceil((actor.y+8)/8)*8
---    --halt upward direction
---    actor.dy = 0
---    --todo: why needed?
---    actor.x=actor.startx
---   end
---
---   if fget(vertex4,1) and not actor.wall_climb
---   then
---    --halt the upward trajectory
---    -- actor.dy -= 1
---    actor.dy = 0
---    -- actor.isgrounded=true
---    -- actor.jumptimer=0
---    actor.x=actor.startx
---    actor.y=actor.starty
---    actor.wall_climb = true
---   end
---
---  end
 
 end
 
@@ -283,6 +215,7 @@ function player:new(x, y)
  o.h=7
 
  o.isgrounded = false
+ o.standing=false
  o.isfacingright = true
  o.jumppressed = false
  o.jumpvelocity = 4
@@ -388,46 +321,60 @@ function player:move()
  self.startx = self.x
  self.starty = self.y
 
- --jump code
- if btn(4) and self.wall_climb then
-  self:jump()
-  self.jumppressed = true
-  self.wall_climb = false
-  fset(3,1,false)
- elseif btn(4) and self.isgrounded
- and self.jumptimer == 0 then
-  self:jump()
-  self.jumppressed = true
- elseif btn(4)
- and self.jumptimer<10
- and self.jumppressed
- and self.dy < 0 then
-  -- elseif code
-  self:extendjump()
+ local holdjump=btn(4)
+ if holdjump and not oholdjump then
+   hitjump=true
+ else
+   hitjump=false
+ end
+ oholdjump=holdjump
 
- elseif not btn(4) then
-  -- elseif code
-  self.jumppressed = false
+ if hitjump then
+   if self.standing then
+     self.dy = min(self.dy, -3)
+   end
+ end
 
+ if self.standing then
+   if btn(0) then
+     self.isfacingright=false
+     if self.dx>0 then
+       self.dx*=0.8
+     end
+     self.dx-=1*globals.dt
+   end
+   if btn(1) then
+     self.isfacingright=true
+     if self.dx<0 then
+       self.dx*=0.8
+     end
+     self.dx+=1*globals.dt
+   end
+
+   if not btn(0) and not btn(1) then
+     self.dx*=.88
+   end
+ else
+   if btn(0) then
+     self.dx-=.85*globals.dt
+   end
+   if btn(1) then
+     self.dx+=.85*globals.dt
+   end
  end
 
 
- if btn(0) then
-   self.isfacingright=false
-   -- if self.dx>0 then
-   --   self.dx*=0.8
-   -- end
-   self.dx-=1*globals.dt
- end
- if btn(1) then
-   self.isfacingright=true
-   -- if self.dx<0 then
-   --   self.dx*=0.8
-   -- end
-   self.dx+=1*globals.dt
- end
 
- updatelocation(self)
+--  if player.sliding then
+--   -- walljump
+--   --todo: no idea
+--   self.dy-=3
+--   self.dy=mid(self.dy,-1,-3)
+--   self.dx=self.slidedir*2
+--   -- self.flipx=(self.slidedir==-1)
+-- end
+
+ -- updatelocation(self)
 
 end
 
