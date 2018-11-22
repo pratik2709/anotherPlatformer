@@ -107,13 +107,9 @@ function _draw()
 end
 
 function iswall(tile)
-  if(fget(tile,0))
-  then
+  if(tile==1) then
     return true
   end
-  -- if(tile==1) then
-  --   return true
-  -- end
 end
 
 
@@ -300,16 +296,16 @@ function player:move()
  if self.standing then
    if btn(0) then
      self.isfacingright=false
-     -- if self.dx>0 then
-     --   self.dx*=0.8
-     -- end
+     if self.dx>0 then
+       self.dx*=0.8
+     end
      self.dx-=0.5*globals.dt
    end
    if btn(1) then
      self.isfacingright=true
-     -- if self.dx<0 then
-     --   self.dx*=0.8
-     -- end
+     if self.dx<0 then
+       self.dx*=0.8
+     end
      self.dx+=0.5*globals.dt
    end
 
@@ -347,16 +343,16 @@ function player:draw()
    if self.isfacingright then
     spr(0,self.x, self.y, 1, 1, false)
    else
-    spr(0,self.x, self.y, 1, 1, false)
+    spr(0,self.x, self.y, 1, 1, true)
    end
   elseif self.dx>=0 then
    if self.isfacingright then
     spr(0,self.x, self.y, 1, 1, false)
    else
-    spr(0,self.x, self.y, 1, 1, false)
+    spr(0,self.x, self.y, 1, 1, true)
    end
   else
-    spr(0,self.x, self.y, 1, 1, false)
+    spr(0,self.x, self.y, 1, 1, true)
   end
  end
 
