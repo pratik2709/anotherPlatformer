@@ -9,23 +9,26 @@ player = {}
 cam = {}
 function draw_debug()
  -- do something
- local steps = abs(player1.dx*globals.dt)
- for i=0,steps do
-   local d=min(1,steps-i)
-
-   --x axis collision
-   if collide(player1, sgn(player1.dx)*d,0) then
-     print("x true", player1:getx(),(player1.y-mapheight)-20,11)
-   end
- end
-
- steps=abs(player1.dy*globals.dt)
- for i=0,steps do
-   local d=min(1,steps-i)
-   if collide(player1,0,sgn(player1.dy)*d) then
-     print("y true", player1:getx(),(player1.y-mapheight),11)
-   end
- end
+ -- steps=abs(player1.dy*globals.dt)
+ -- for i=0,steps do
+ --   local d=min(1,steps-i)
+ --   if collide(player1,0,sgn(player1.dy)*d) then
+ --   else
+ --     --code for ledges
+ --     if player1.dy > 0 and not hitjump then
+ --       -- check left and right
+ --       print("t1",player1:getx(),(player1.y-mapheight)-20,11)
+ --       for j=-1,1,2 do
+ --         if not collide(player1, j, -1, true) then
+ --           print("first par",player1:getx(),(player1.y-mapheight)-30,11)
+ --           if collide(player1,j,0, true) then
+             print(player1.hanging,player1:getx(),(player1.y-mapheight)-10,11)
+ --           end
+ --         end
+ --       end
+ --     end
+ --   end
+ -- end
 end
 
 function cam:new(mapwidth, mapheight)
@@ -117,7 +120,14 @@ end
 --collision code
 function checkwallcollision(actor)
   actor.standing = false
-  actor.dy += globals.gravity
+
+  if actor.hanging then
+    actor.dx=0
+    actor.dy=0
+  else
+    actor.dy += globals.gravity
+
+  end
 
   local steps = abs(actor.dx*globals.dt)
   for i=0,steps do
@@ -142,11 +152,27 @@ function checkwallcollision(actor)
       break
     else
       actor.y+=sgn(actor.dy)*d
+
+      --code for ledges
+      if actor.dy > 0 and not hitjump then
+        -- check left and right
+        for j=-1,1,2 do
+          if not collide(actor, j, -1, true) then
+            if collide(actor,j,0, true) then
+              actor.hanging=true
+              -- actor.hangdir=j
+              actor.dx=0
+              actor.dy=0
+            end
+          end
+        end
+        if (actor.hanging) break
+      end
     end
   end
 
   --standing on something code
-  if collide(actor,0,1) then
+  if collide(actor,0,1) and not actor.hanging then
     actor.standing=true
     actor.falltimer=0
   else
@@ -187,6 +213,7 @@ function player:new(x, y)
 
  o.isgrounded = false
  o.standing=false
+ o.hanging=false
  o.isfacingright = true
  o.jumppressed = false
  o.jumpvelocity = 4
@@ -218,11 +245,13 @@ function collide(agent,vx,vy,toponly)
 	if vx!=0 then
     --notice only the sign is being used here
     if sgn(vx) == -1 then
+      --left corners
       x1=agent.x
       y1=agent.y
       x2=agent.x
       y2=agent.y+agent.h
     else
+      -- right corners
       x1=agent.x + agent.w
       y1=agent.y
       x2=agent.x + agent.w
@@ -255,11 +284,18 @@ function collide(agent,vx,vy,toponly)
 	local tile1=mget(x1/8,y1/8)
 	local tile2=mget(x2/8,y2/8)
 
-		-- for standard collisions,
+
 		-- check two corners
-		if iswall(tile1) or iswall(tile2) then
-	 		return true
-	 	end
+    if toponly then
+      if iswall(tile1) then
+  	 		return true
+  	 	end
+    else
+      -- for standard collisions,
+  		if iswall(tile1) or iswall(tile2) then
+  	 		return true
+  	 	end
+    end
 
  	-- no hits have been returned
 	return false
@@ -289,8 +325,17 @@ function player:move()
 
  if hitjump then
    if self.standing or self.falltimer < 7 then
-     self.dy = min(self.dy, -3)
+     self.dy = min(self.dy, -4)
+
+   elseif self.hanging then
+     if not btn(3) then
+       self.dy=-3
+     else
+       self.dy=1
+     end
+     self.hanging=false
    end
+
  end
 
  if self.standing then
