@@ -9,56 +9,23 @@ player = {}
 cam = {}
 function draw_debug()
  -- do something
- local xoffset=0
- if player1.dx>0 then xoffset=7 end
- local vertex3=mget((player1.x+8)/8,(player1.y)/8)
- local vertex4=mget((player1.x+8)/8,(player1.y+8)/8)
- --code for wall climb
- -- if player1.dy < 0 then
+ local steps = abs(player1.dx*globals.dt)
+ for i=0,steps do
+   local d=min(1,steps-i)
 
- --  print(fget(vertex3,0),player1:getx(),(player1.y-mapheight)-10,11)
- --  print(fget(vertex4,0),player1:getx(),(player1.y-mapheight)-20,11)
+   --x axis collision
+   if collide(player1, sgn(player1.dx)*d,0) then
+     print("x true", player1:getx(),(player1.y-mapheight)-20,11)
+   end
+ end
 
- --  if fget(vertex3,1) or fget(vertex4,1)
- --  then
- --   print("god",player1:getx(),player1.y-mapheight,11)
- --  end
- -- end
-  -- print(player1:getx(),player1:getx(),(player1.y-mapheight)-10,11)
- -- print(mget((player1.x+xoffset)/8,(player1.y+7)/8),player1:getx()
- --  ,5,11)
- -- print(fget(mget((player1.x+xoffset)/8,(player1.y+7)/8),0)
- --  ,player1:getx(),player1.y,11)
- -- print(player1.dx,player1:getx(),0,11)
- -- print(player1.y,player1:getx(),0,11)
- -- if btn(4) and player1.isgrounded
- --  and player1.jumptimer == 0 then
- --  print(player1.dy, player1:getx(),
- --   (player1.y-mapheight)-10,11)
- -- end
- -- print(player1.wall_climb,player1:getx(),(player1.y-mapheight)-10,11)
- -- print(player1.jumptimer,player1:getx(),(player1.y-mapheight)-20,11)
--- print(sgn(player1.dx), player1:getx(),(player1.y-mapheight)-10,11)
- -- local steps = abs(player1.dx*globals.dt)
- -- for i=0,steps do
- --   local d=min(1,steps-i)
- --
- --   --x axis collision
- --   if collide(player1, 1*d,0) then
- --     print("True", player1:getx(),(player1.y-mapheight)-10,11)
- --     break
- --   else
- --     print("False", player1:getx(),(player1.y-mapheight),11)
- --   end
- -- end
- -- print(sgn(player1.dx), player1:getx(),(player1.y-mapheight)-10,11)
- -- print(sgn(player1.dy), player1:getx(),(player1.y-mapheight)-20,11)
- -- if hitjump then
- --   print("True", player1:getx(),(player1.y-mapheight)-20,11)
- -- end
- if(sgn(player1.dx) == -1) then
- print("hello", player1:getx(),(player1.y-mapheight)-20,11)
-  end
+ steps=abs(player1.dy*globals.dt)
+ for i=0,steps do
+   local d=min(1,steps-i)
+   if collide(player1,0,sgn(player1.dy)*d) then
+     print("y true", player1:getx(),(player1.y-mapheight),11)
+   end
+ end
 end
 
 function cam:new(mapwidth, mapheight)
@@ -140,9 +107,13 @@ function _draw()
 end
 
 function iswall(tile)
-  if(tile==1) then
+  if(fget(tile,0))
+  then
     return true
   end
+  -- if(tile==1) then
+  --   return true
+  -- end
 end
 
 
@@ -215,8 +186,8 @@ function player:new(x, y)
  o.y = y
  o.dx = 0
  o.dy = 0
- o.w=7
- o.h=7
+ o.w=6
+ o.h=6
 
  o.isgrounded = false
  o.standing=false
@@ -241,47 +212,61 @@ function player:new(x, y)
  return o
 end
 
-function collide(actor, dx, dy)
- local x1,x2,y1,y2
+function collide(agent,vx,vy,toponly)
+	local x1,x2,y1,y2
 
- if dx!=0 then
-   if sgn(dx) != -1 then
-     x1=actor.x + sgn(dx) * actor.w
-   else
-     -- left behaviour is wierd
-     x1=actor.x + -1* actor.w
-   end
+	-- we'll test two points:
+  --  P--.--P (depending on the vs sign?)
+  -- origin point + up-down or left right
+  -- needs a proper diagram!
+	if vx!=0 then
+    --notice only the sign is being used here
+    if sgn(vx) == -1 then
+      x1=agent.x
+      y1=agent.y
+      x2=agent.x
+      y2=agent.y+agent.h
+    else
+      x1=agent.x + agent.w
+      y1=agent.y
+      x2=agent.x + agent.w
+      y2=agent.y + agent.h
+    end
 
-  x2=x1
-  y1=actor.y - actor.h
-  y2=actor.y + actor.h
- else
-   if sgn(dy) != -1 then
-     y1=actor.y+sgn(dy)*actor.h
-   else
-     y1=actor.y
-   end
-  y2=y1
-  x1=actor.x-actor.w
-  x2=actor.x+actor.w
- end
+	else
+    if sgn(vy) == -1 then
+      y1=agent.y
+      x1=agent.x + agent.w
+      y2=agent.y
+      x2=agent.x
+    else
+      y1=agent.y+sgn(vy)*agent.h
+      x1=agent.x + agent.w
+      y2=agent.y+sgn(vy)*agent.h
+      x2=agent.x
+    end
+	end
 
- --add potential movement to test points
- x1+=dx
- x2+=dx
- y1+=dy
- y2+=dy
+	-- add our potential movement
+	-- to our test points
+  -- todo: why we need potential movements?
+	x1+=vx
+	x2+=vx
+	y1+=vy
+	y2+=vy
 
- local tile1=mget(x1/8,y1/8)
- local tile2=mget(x2/8,y2/8)
+	-- check for map-tile hits
+	local tile1=mget(x1/8,y1/8)
+	local tile2=mget(x2/8,y2/8)
 
- --standard collisions
- if iswall(tile1) or iswall(tile2) then
-  return true
- end
+		-- for standard collisions,
+		-- check two corners
+		if iswall(tile1) or iswall(tile2) then
+	 		return true
+	 	end
 
- --no hits
- return false
+ 	-- no hits have been returned
+	return false
 end
 
 function player:getx()
@@ -315,16 +300,16 @@ function player:move()
  if self.standing then
    if btn(0) then
      self.isfacingright=false
-     if self.dx>0 then
-       self.dx*=0.8
-     end
+     -- if self.dx>0 then
+     --   self.dx*=0.8
+     -- end
      self.dx-=0.5*globals.dt
    end
    if btn(1) then
      self.isfacingright=true
-     if self.dx<0 then
-       self.dx*=0.8
-     end
+     -- if self.dx<0 then
+     --   self.dx*=0.8
+     -- end
      self.dx+=0.5*globals.dt
    end
 
@@ -362,16 +347,16 @@ function player:draw()
    if self.isfacingright then
     spr(0,self.x, self.y, 1, 1, false)
    else
-    spr(0,self.x, self.y, 1, 1, true)
+    spr(0,self.x, self.y, 1, 1, false)
    end
   elseif self.dx>=0 then
    if self.isfacingright then
     spr(0,self.x, self.y, 1, 1, false)
    else
-    spr(0,self.x, self.y, 1, 1, true)
+    spr(0,self.x, self.y, 1, 1, false)
    end
   else
-    spr(0,self.x, self.y, 1, 1, true)
+    spr(0,self.x, self.y, 1, 1, false)
   end
  end
 
