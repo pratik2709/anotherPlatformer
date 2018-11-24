@@ -70,13 +70,33 @@ function _init()
  mycam = cam:new(mapwidth, mapheight)
  player1 = player:new(32,72)
  stars = {}
- for i=1,128 do
-  add(stars,{
-   x=rnd(128),
-   y=rnd(128),
-   s=rnd(2)+1
-  })
- end
+ initialize_stars()
+end
+
+function initialize_stars()
+  for i=1,128 do
+   add(stars,{
+    x=rnd(128),
+    y=rnd(128),
+    s=rnd(2)+1
+   })
+  end
+end
+
+function draw_stars()
+  for st in all(stars) do
+   pset(st.x,st.y,6)
+  end
+end
+
+function update_stars()
+  for st in all(stars) do
+   st.y += st.s
+   if st.y >= 128 then
+    st.y = 0
+    st.x=rnd(128)
+   end
+  end
 end
 
 function _update()
@@ -93,12 +113,11 @@ function _draw()
  player1:draw()
  --draw in layers
  map(0,0,0,0,128,128)
- for st in all(stars) do
-  pset(st.x,st.y,6)
- end 
- draw_debug()
 
+ draw_debug()
+ draw_stars()
 end
+
 
 function iswall(tile)
   if(tile==1) then
@@ -408,14 +427,10 @@ function player:update()
  if self.invtimer <= 0 then
   self.invuln = false
  end
- for st in all(stars) do
-  st.y += st.s
-  if st.y >= 128 then
-   st.y = 0
-   st.x=rnd(128)
-  end
- end
+ update_stars()
 end
+
+
 
 --collision related
 function intersect(min1, max1, min2, max2)
