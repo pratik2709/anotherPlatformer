@@ -25,39 +25,14 @@ function cam:new(mapwidth, mapheight)
 end
 
 function cam:followplayer(playerx, playery)
---https://gamedev.stackexchange.com/questions/44256/how-to-add-a-scrolling-camera-to-a-2d-java-game
---https://stackoverflow.com/questions/9997006/slick2d-and-jbox2d-how-to-draw?answertab=votes#tab-top
---offsetmaxx = world_size_x - viewport_size_x
---offsetminx = 0
--- no idea why subtract from world width
- self.x=playerx-self.mapwidth
- self.y=playery-self.mapheight
- -- these sonditions are so that camera doesnt go out
- --of bounds. 16 is length of map u are currently viewing
- --in the viewport
- -- leftmost bound for x
- -- if self.x<0 then
- --  self.x=0
- -- end
- --
- -- if self.y<0 then
- --  self.y=0
- -- end
-
 --right-most bound for x
 -- from jelpi game
+--128*64
 -- cx=mid(cx,64,128*8-64)
 -- cy=mid(cy,64,64*8-64)
-  self.x = mid(0,self.x,1024-128)
-  self.y = mid(0,((playery+32)-self.mapheight),(512-64)+32)
- -- if self.x>(self.mapwidth-16)*16 then
- --   self.x = (self.mapwidth-16)*16
- -- end
- --
- -- if self.y>1024 then
- --  --19 is the lowest point
- --   self.y = 1024
- -- end
+--64 viewport size to keep centered
+  self.x = mid(0,playerx-64,1024-128)
+  self.y = mid(0,((playery)-64),512-128)
 
  camera(self.x,self.y)
 end
@@ -72,8 +47,8 @@ end
 
 function _init()
  level2=false
- mapwidth = 64
- mapheight = 128
+ mapwidth = 128
+ mapheight = 64
  mycam = cam:new(mapwidth, mapheight)
  player1 = player:new(10,10)
  stars = {}
