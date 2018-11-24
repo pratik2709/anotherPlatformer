@@ -31,7 +31,7 @@ function cam:followplayer(playerx, playery)
 --offsetminx = 0
 -- no idea why subtract from world width
  self.x=playerx-self.mapwidth
- self.y=playery-(self.mapheight)
+ self.y=playery-self.mapheight
  -- these sonditions are so that camera doesnt go out
  --of bounds. 16 is length of map u are currently viewing
  --in the viewport
@@ -45,14 +45,16 @@ function cam:followplayer(playerx, playery)
  end
 
 --right-most bound for x
- if self.x>1000 then
-   self.x = 1000
- end
-
- if self.y>(1000) then
-  --19 is the lowest point
-   self.y = 1000
- end
+self.x = mid(0,self.x,1024-128)
+-- self.y = mid(0,self.y,1024-128)
+ -- if self.x>(self.mapwidth-16)*16 then
+ --   self.x = (self.mapwidth-16)*16
+ -- end
+ --
+ -- if self.y>1024 then
+ --  --19 is the lowest point
+ --   self.y = 1024
+ -- end
 
  camera(self.x,self.y)
 end
@@ -67,9 +69,9 @@ end
 
 function _init()
  level2=false
- mapwidth = 256
- mapheight = 128
- mycam = cam:new(10, 10)
+ mapwidth = 64
+ mapheight = 64
+ mycam = cam:new(mapwidth, mapheight)
  player1 = player:new(10,10)
  stars = {}
  initialize_stars()
