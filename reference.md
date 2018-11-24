@@ -44,3 +44,12 @@ Sprite sheet treated as a 128x128 image, uses pixel locations
 
 
 map( celx, cely, sx, sy, celw, celh, [layer] )
+draws the map
+
+rnd( max )
+Generates a random number between 0 and the given maximum.
+
+pset( x, y, [c] )
+Sets a pixel in the graphics buffer.
+[c]
+The color value. If not specified, uses the current color of the draw state.
