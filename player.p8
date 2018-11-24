@@ -9,26 +9,7 @@ player = {}
 cam = {}
 function draw_debug()
  -- do something
- -- steps=abs(player1.dy*globals.dt)
- -- for i=0,steps do
- --   local d=min(1,steps-i)
- --   if collide(player1,0,sgn(player1.dy)*d) then
- --   else
- --     --code for ledges
- --     if player1.dy > 0 and not hitjump then
- --       -- check left and right
- --       print("t1",player1:getx(),(player1.y-mapheight)-20,11)
- --       for j=-1,1,2 do
- --         if not collide(player1, j, -1, true) then
- --           print("first par",player1:getx(),(player1.y-mapheight)-30,11)
- --           if collide(player1,j,0, true) then
-             print(player1.hanging,player1:getx(),(player1.y-mapheight)-10,11)
- --           end
- --         end
- --       end
- --     end
- --   end
- -- end
+ -- print(player1.hanging,player1:getx(),(player1.y-mapheight)-10,11)
 end
 
 function cam:new(mapwidth, mapheight)
@@ -63,8 +44,8 @@ function cam:followplayer(playerx, playery)
  end
 
 --right-most bound for x
- if self.x>(self.mapwidth-16)*8 then
-   self.x = (self.mapwidth-16)*8
+ if self.x>(self.mapwidth-16)*16 then
+   self.x = (self.mapwidth-16)*16
  end
 
  if self.y>(self.mapheight+19) then
@@ -84,7 +65,7 @@ function cam:reset()
 end
 
 function _init()
- mapwidth = 64
+ mapwidth = 100
  mapheight = 16
  mycam = cam:new(mapwidth, mapheight)
  player1 = player:new(32,72)
@@ -104,7 +85,7 @@ function _draw()
  player1:draw()
 
  --draw in layers
- map(0,0,0,0,24,64)
+ map(0,0,0,0,128,128)
  draw_debug()
 
 end
