@@ -1,6 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
+--https://neko250.github.io/pico8-api/
 globals = {
  gravity = 0.2,
  dt = 0.5,
@@ -27,10 +28,11 @@ end
 function cam:followplayer(playerx, playery)
 --right-most bound for x
 -- from jelpi game
---128*64
+--128*64 map size
 -- cx=mid(cx,64,128*8-64)
 -- cy=mid(cy,64,64*8-64)
 --64 viewport size to keep centered
+--128 may be the resolutions
   self.x = mid(0,playerx-64,1024-128)
   self.y = mid(0,((playery)-64),512-128)
 
@@ -53,6 +55,7 @@ function _init()
  player1 = player:new(10,10)
  stars = {}
  initialize_stars()
+ j = 1
 end
 
 function initialize_stars()
@@ -86,18 +89,33 @@ function _update()
  player1:update()
 
  checkwallcollision(player1)
- if globals.level2 then update_stars() end
+ if globals.level2 then
+    update_stars()
+  end
 end
 
 function _draw()
  -- draw code
  cls()
- mycam:followplayer(player1:getx(), player1.y)
+ if not globals.level2 then
+   mycam:followplayer(player1:getx(), player1.y)
+ end
+
  player1:draw()
  --draw in layers
  map(0,0,0,0,128,128)
  draw_debug()
- if globals.level2 then draw_stars() end
+ if globals.level2 then
+   draw_stars()
+   if j < 500 then
+      mycam:followplayer(player1:getx(), player1.y-j)
+      j+=1
+  else
+      mycam:followplayer(player1:getx(), player1.y-500)
+    end
+
+
+ end
 
 end
 
