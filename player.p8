@@ -3,7 +3,8 @@ version 16
 __lua__
 globals = {
  gravity = 0.2,
- dt = 0.5
+ dt = 0.5,
+ level2=false,
 }
 player = {}
 cam = {}
@@ -65,6 +66,7 @@ function cam:reset()
 end
 
 function _init()
+ level2=false
  mapwidth = 100
  mapheight = 16
  mycam = cam:new(mapwidth, mapheight)
@@ -102,8 +104,9 @@ end
 function _update()
  player1:move()
  player1:update()
- checkwallcollision(player1)
 
+ checkwallcollision(player1)
+ if globals.level2 then update_stars() end
 end
 
 function _draw()
@@ -113,9 +116,9 @@ function _draw()
  player1:draw()
  --draw in layers
  map(0,0,0,0,128,128)
-
  draw_debug()
- draw_stars()
+ if globals.level2 then draw_stars() end
+
 end
 
 
@@ -167,8 +170,8 @@ function checkwallcollision(actor)
       if actor.dy > 0 and not hitjump then
         -- check left and right
         for j=-1,1,2 do
-          if not collide(actor, j, -1, true) then
-            if collide(actor,j,0, true) then
+          if not collide(actor, j, -1, "toponly") then
+            if collide(actor,j,0, "toponly") then
               actor.hanging=true
               -- actor.hangdir=j
               actor.dx=0
@@ -182,9 +185,12 @@ function checkwallcollision(actor)
   end
 
   --standing on something code
-  if collide(actor,0,1) and not actor.hanging then
+  if(collide(actor,0,1,"level2")) and not actor.hanging then
+    globals.level2 = true
+  elseif collide(actor,0,1) and not actor.hanging then
     actor.standing=true
     actor.falltimer=0
+
   else
     actor.falltimer+=1
   end
@@ -294,18 +300,23 @@ function collide(agent,vx,vy,toponly)
 	local tile1=mget(x1/8,y1/8)
 	local tile2=mget(x2/8,y2/8)
 
-
-		-- check two corners
-    if toponly then
-      if iswall(tile1) then
-  	 		return true
-  	 	end
-    else
-      -- for standard collisions,
-  		if iswall(tile1) or iswall(tile2) then
-  	 		return true
-  	 	end
+  if toponly == "level2" then
+    if fget(tile1,1) or fget(tile2,1) then
+      return true
     end
+	-- check two corners
+  elseif toponly == "toponly" then
+    if iswall(tile1) then
+	 		return true
+	 	end
+  else
+    -- for standard collisions,
+		if iswall(tile1) or iswall(tile2) then
+	 		return true
+	 	end
+  end
+
+
 
  	-- no hits have been returned
 	return false
@@ -427,7 +438,6 @@ function player:update()
  if self.invtimer <= 0 then
   self.invuln = false
  end
- update_stars()
 end
 
 
