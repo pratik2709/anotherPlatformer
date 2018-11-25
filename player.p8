@@ -66,6 +66,11 @@ function initialize_shooter()
     imm=false,
     box = {x1=0,y1=0,x2=7,y2=7}
   }
+  bound_area = {}
+  bound_area.x_max = (80*8)+(64)
+  bound_area.x_min = (80*8)-(64)
+  bound_area.y_min = (40*8)-(128)
+  bound_area.y_max = (40*8)
   bullets={}
   enemies={}
   explosions={}
@@ -75,10 +80,10 @@ function initialize_shooter()
 end
 
 function initialize_stars()
-  for i=1,1024 do
+  for i=1,512 do
    add(stars,{
-    x=rnd(1024-128),
-    y=rnd(512-128),
+    x=rnd(bound_area.x_max) + bound_area.x_min,
+    y=rnd(bound_area.y_max) + bound_area.y_min,
     s=rnd(2)+1
    })
   end
@@ -96,12 +101,33 @@ end
 
 function update_stars()
   for st in all(stars) do
-   st.y += st.s
-   if st.y >= (512-128) then
-    st.y = 0
-    st.x=rnd((1024-128))
-   end
+
+  st.y += st.s
+  if st.y >= bound_area.y_max then
+   st.y = bound_area.y_min
+   st.x=rnd(bound_area.x_max) + bound_area.x_min
   end
+  -- if st.x >= bound_area.x_max
+  --  then
+  --  st.x = bound_area.y_min
+  --  st.x=rnd(bound_area.x_max)
+  -- end
+end
+  -- for st in all(stars) do
+  --  st.y += st.s
+  --  if st.y <= bound_area.y_min then
+  --    st.y=bound_area.y_min
+  --  end
+  --  if st.y >= bound_area.y_max then
+  --    st.y=bound_area.y_max
+  --  end
+  --  if st.x <= bound_area.x_min then
+  --    st.x=bound_area.x_min
+  --  end
+  --  if st.x >= bound_area.x_max then
+  --    st.x=bound_area.x_max
+  --  end
+  -- end
 end
 
 function _update()
@@ -145,6 +171,13 @@ function iswall(tile)
 end
 
 function update_shooter()
+
+  -- for bullet in all(bullets) do
+  --   b.x+=b.dx
+  --   b.y+=b.dy
+  --   if b.x < 0 or b.x
+  -- end
+  --controls
   if btn(0) then ship.x-=1 end
   if btn(1) then ship.x+=1 end
   if btn(2) then ship.y-=1 end
@@ -153,7 +186,15 @@ function update_shooter()
 end
 
 function fire()
-
+  local bullet = {
+    sprite_number=5,
+    x=ship.x,
+    y=ship.y,
+    dx=0,
+    dy=-3,
+    box={x1=2,y1=0,x2=5,y2=4}
+  }
+  add(bullets,bullet)
 end
 
 --collision code
