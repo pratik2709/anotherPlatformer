@@ -80,10 +80,10 @@ function initialize_shooter()
 end
 
 function initialize_stars()
-  for i=1,512 do
+  for i=1,128 do
    add(stars,{
-    x=rnd(bound_area.x_max) + bound_area.x_min,
-    y=rnd(bound_area.y_max) + bound_area.y_min,
+    x=rnd(128) + 576,
+    y=rnd(128) + 192,
     s=rnd(2)+1
    })
   end
@@ -103,9 +103,9 @@ function update_stars()
   for st in all(stars) do
 
   st.y += st.s
-  if st.y >= bound_area.y_max then
-   st.y = bound_area.y_min
-   st.x=rnd(bound_area.x_max) + bound_area.x_min
+  if st.y >= 320 then
+   st.y = 192
+   st.x=rnd(128) + 576
   end
   -- if st.x >= bound_area.x_max
   --  then
