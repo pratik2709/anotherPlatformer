@@ -53,3 +53,5 @@ pset( x, y, [c] )
 Sets a pixel in the graphics buffer.
 [c]
 The color value. If not specified, uses the current color of the draw state.
+
+http://pico-8.wikia.com/wiki/Rnd
