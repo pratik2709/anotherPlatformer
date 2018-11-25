@@ -111,6 +111,7 @@ function _update()
     checkwallcollision(player1)
   elseif globals.level == 2 then
     update_stars()
+    update_shooter()
   end
 end
 
@@ -122,12 +123,12 @@ function _draw()
    map(0,0,0,0,128,128)
  elseif globals.level==2 then
    draw_stars()
-   if j < 500 then
+   if ship.y > (40*8) then
       mycam:followplayer(ship.x, ship.y)
       ship.y -= j
       j+=1
-  else
-      mycam:followplayer(ship.x, ship.y-500)
+  elseif ship.y <= 320 then
+      mycam:followplayer(ship.x, ship.y)
     end
  end
 
@@ -143,6 +144,17 @@ function iswall(tile)
   end
 end
 
+function update_shooter()
+  if btn(0) then ship.x-=1 end
+  if btn(1) then ship.x+=1 end
+  if btn(2) then ship.y-=1 end
+  if btn(3) then ship.y+=1 end
+  if btnp(4) then fire() end
+end
+
+function fire()
+
+end
 
 --collision code
 function checkwallcollision(actor)
