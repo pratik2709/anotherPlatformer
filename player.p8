@@ -53,9 +53,26 @@ function _init()
  mapheight = 64
  mycam = cam:new(mapwidth, mapheight)
  player1 = player:new(10,10)
- stars = {}
- initialize_stars()
- j = 1
+ initialize_shooter()
+end
+
+function initialize_shooter()
+  ship = {
+    sprite_number=4,
+    x=60,
+    y=100,
+    h=4,
+    p=0,
+    t=0,
+    imm=false,
+    box = {x1=0,y1=0,x2=7,y2=7}
+  }
+  bullets={}
+  enemies={}
+  explosions={}
+  stars = {}
+  initialize_stars()
+  j = 1
 end
 
 function initialize_stars()
