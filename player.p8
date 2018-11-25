@@ -5,7 +5,7 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level2=false,
+ level=1,
 }
 player = {}
 cam = {}
@@ -48,7 +48,6 @@ function cam:reset()
 end
 
 function _init()
- level2=false
  mapwidth = 128
  mapheight = 64
  mycam = cam:new(mapwidth, mapheight)
@@ -106,35 +105,34 @@ function update_stars()
 end
 
 function _update()
- player1:move()
- player1:update()
-
- checkwallcollision(player1)
- if globals.level2 then
+  if globals.level == 1 then
+    player1:move()
+    player1:update()
+    checkwallcollision(player1)
+  elseif globals.level == 2 then
     update_stars()
   end
 end
 
 function _draw()
- -- draw code
  cls()
- if not globals.level2 then
+ if globals.level==1 then
    mycam:followplayer(player1:getx(), player1.y)
- end
-
- player1:draw()
- --draw in layers
- map(0,0,0,0,128,128)
- draw_debug()
- if globals.level2 then
+   player1:draw()
+   map(0,0,0,0,128,128)
+ elseif globals.level==2 then
    draw_stars()
    if j < 500 then
-      mycam:followplayer(player1:getx(), player1.y-j)
+      mycam:followplayer(ship.x, ship.y)
+      ship.y -= j
       j+=1
   else
-      mycam:followplayer(player1:getx(), player1.y-500)
+      mycam:followplayer(ship.x, ship.y-500)
     end
  end
+
+ draw_debug()
+
 
 end
 
@@ -201,8 +199,8 @@ function checkwallcollision(actor)
   end
 
   --standing on something code
-  if(collide(actor,0,1,"level2")) and not actor.hanging then
-    globals.level2 = true
+  if(collide(actor,0,1,"level_change")) and not actor.hanging then
+    globals.level = 2
   elseif collide(actor,0,1) and not actor.hanging then
     actor.standing=true
     actor.falltimer=0
@@ -267,7 +265,7 @@ function player:new(x, y)
  return o
 end
 
-function collide(agent,vx,vy,toponly)
+function collide(agent,vx,vy,collide_condition)
 	local x1,x2,y1,y2
 
 	-- we'll test two points:
@@ -316,12 +314,12 @@ function collide(agent,vx,vy,toponly)
 	local tile1=mget(x1/8,y1/8)
 	local tile2=mget(x2/8,y2/8)
 
-  if toponly == "level2" then
+  if collide_condition == "level_change" then
     if fget(tile1,1) or fget(tile2,1) then
       return true
     end
 	-- check two corners
-  elseif toponly == "toponly" then
+  elseif collide_condition == "toponly" then
     if iswall(tile1) then
 	 		return true
 	 	end
