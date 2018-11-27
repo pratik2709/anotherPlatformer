@@ -48,11 +48,12 @@ function cam:reset()
 end
 
 function _init()
- mapwidth = 128
- mapheight = 64
- mycam = cam:new(mapwidth, mapheight)
- player1 = player:new(10,10)
- initialize_shooter()
+  t=0
+  mapwidth = 128
+  mapheight = 64
+  mycam = cam:new(mapwidth, mapheight)
+  player1 = player:new(10,10)
+  initialize_shooter()
 end
 
 function initialize_shooter()
@@ -60,7 +61,7 @@ function initialize_shooter()
     sprite_number=4,
     x=80*8,
     y=62*8,
-    h=4,
+    health=4,
     p=0,
     t=0,
     imm=false,
@@ -89,30 +90,50 @@ function initialize_stars()
   end
 end
 
-function draw_stars()
+function draw_shooter()
   for st in all(stars) do
    pset(st.x,st.y,6)
   end
 
   if not ship.imm or t%8 < 4 then
    spr(ship.sprite_number,ship.x,ship.y)
+   print(ship.x, ship.x,ship.y-3)
+   print(ship.y, ship.x+10,ship.y-3)
+  end
+
+  for enemy in all(enemies) do
+    spr(enemy.sprite_number, enemy.x, enemy.y)
   end
 end
 
 function update_stars()
+  t=t+1
   for st in all(stars) do
-
-  st.y += st.s
-  if st.y >= 320 then
-   st.y = 192
-   st.x=rnd(128) + 576
+    st.y += st.s
+    if st.y >= 320 then
+     st.y = 192
+     st.x=rnd(128) + 576
+    end
   end
-  -- if st.x >= bound_area.x_max
-  --  then
-  --  st.x = bound_area.y_min
-  --  st.x=rnd(bound_area.x_max)
-  -- end
-end
+
+  if tablelength(enemies) <= 0 then
+    respawn()
+  end
+
+  for enemy in all(enemies) do
+    -- go down
+    enemy.my += 1.3
+    enemy.x = enemy.r*sin(enemy.d*t/50) + enemy.mx
+    enemy.y = enemy.r*cos(t/50) + enemy.my
+    if shooter_collision(ship, enemy) then
+      ship.health -= 1
+      if ship.health <= 0 then
+        game_over()
+      end
+    end
+
+    --skipping delete
+  end
   -- for st in all(stars) do
   --  st.y += st.s
   --  if st.y <= bound_area.y_min then
@@ -128,6 +149,46 @@ end
   --    st.x=bound_area.x_max
   --  end
   -- end
+end
+
+function game_over()
+  _update = update_over
+  _draw = draw_over
+end
+
+function update_over()
+end
+
+function draw_over()
+  cls()
+  print("game over", 50,50,4)
+end
+
+function respawn()
+  local number_of_enemies = flr(rnd(9)) + 2
+  for i=1,number_of_enemies do
+    local d = -1
+
+    local e = {
+     sprite_number=5,
+     -- mx=i*16,
+     -- my=20-i*8,
+     mx=620,
+     my=280,
+     d=280,
+     x=-32,
+     y=-32,
+     r=12,
+     box = {x1=0,y1=0,x2=7,y2=7}
+    }
+    add(enemies,e)
+  end
+end
+
+function tablelength(t)
+  local count = 0
+  for _ in pairs(t) do count = count + 1 end
+  return count
 end
 
 function _update()
@@ -148,19 +209,10 @@ function _draw()
    player1:draw()
    map(0,0,0,0,128,128)
  elseif globals.level==2 then
-   draw_stars()
-   if ship.y > (40*8) then
-      mycam:followplayer(ship.x, ship.y)
-      ship.y -= j
-      j+=1
-  elseif ship.y <= 320 then
-      mycam:followplayer(ship.x, ship.y)
-    end
+   draw_shooter()
+
  end
-
  draw_debug()
-
-
 end
 
 
@@ -171,7 +223,11 @@ function iswall(tile)
 end
 
 function update_shooter()
-
+  if ship.y > (40*8 - 40) then
+     ship.y -= j
+     j+=1
+   end
+   mycam:followplayer(ship.x, ship.y)
   -- for bullet in all(bullets) do
   --   b.x+=b.dx
   --   b.y+=b.dy
@@ -261,23 +317,6 @@ function checkwallcollision(actor)
   else
     actor.falltimer+=1
   end
-
-  -- actor.sliding = false
-  -- if collide(actor,1,0) then
-  --   local tile=mget(actor.x/8+1, actor.y/8)
-  --   if(iswall(tile)) then
-  --     actor.sliding=true
-  --     -- actor.slidedir=-1
-  --     if(actor.dy>0) actor.dy*=0.97
-  --   end
-  -- elseif collide(actor,-1,0) then
-  --   local tile=mget(actor.x/8-1,actor.y/8)
-  --   if(iswall(tile)) then
-  --     actor.sliding=true
-  --     -- actor.slidedir=-1
-  --     if(actor.dy>0) actor.dy*=0.97
-  --   end
-  -- end
 
   actor.dx*=.98
 
@@ -522,6 +561,32 @@ function actorcollide(actor1, actor2)
   actor2.y, actor2.y+8)
 end
 
+function abs_box(s)
+  --finding actual location of the characters on the maps
+  -- and the bounding box
+  local box = {}
+  box.x1 = s.box.x1 + s.x
+  box.y1 = s.box.y1 + s.y
+  box.x2 = s.box.x2 + s.x
+  box.y2 = s.box.y2 + s.y
+  return box
+end
+
+function shooter_collision(a,b)
+  local box_a = abs_box(a)
+  local box_b = abs_box(b)
+
+  if box_a.x1 > box_b.x2 or
+     box_a.y1 > box_b.y2 or
+     box_b.x1 > box_a.x2 or
+     box_b.y1 > box_a.y2 then
+     return false
+  end
+
+  return true
+
+end
+
 -- object, starting frame, number of frames,
 -- animation speed, flip
 function anim(actor, start_frame, number_of_frames,
@@ -545,8 +610,8 @@ __gfx__
 00000000888888880000000099999999000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000088888888000000009bbbbbb900c00c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0070070088888888000000009bbbbbb900c00c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0007700088888888000000009bb88bb9cccccccc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0007700088888888000000009bb88bb9c999999c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0007700088888888000000009bb88bb9cccccccc000bb00000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0007700088888888000000009bb88bb9c999999c000bb00000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0070070088888888000000009bbbbbb9cccccccc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000088888888000000009bbbbbb90c0cc0c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000888888880000000099999999000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
