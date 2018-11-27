@@ -8,6 +8,7 @@ globals = {
  level=1,
 }
 player = {}
+baddies = {}
 cam = {}
 function draw_debug()
  -- do something
@@ -55,6 +56,12 @@ function _init()
   player1 = player:new(10,10)
   initialize_shooter()
 end
+
+--*****************Ground Enemy***********************
+
+
+
+--******************Shooter*************************
 
 function initialize_shooter()
   ship = {
@@ -117,7 +124,6 @@ function update_stars()
   end
 
   if tablelength(enemies) <= 0 then
-    printh("here in respawn")
     respawn()
   end
 
@@ -195,6 +201,8 @@ function tablelength(t)
   for _ in pairs(t) do count = count + 1 end
   return count
 end
+
+--*******************************************
 
 function _update()
   if globals.level == 1 then
@@ -553,7 +561,7 @@ end
 
 
 
---collision related
+--**************************collision related
 function intersect(min1, max1, min2, max2)
  return max(min1, max1) > min(min2, max2) and
         min(min1, max1) < max(min2,max2)

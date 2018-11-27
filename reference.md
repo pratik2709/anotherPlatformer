@@ -55,3 +55,6 @@ Sets a pixel in the graphics buffer.
 The color value. If not specified, uses the current color of the draw state.
 
 http://pico-8.wikia.com/wiki/Rnd
+
+run pico8:
+/Applications/PICO-8.app/Contents/MacOS/pico8 ~/projects/test-platformer/player.p8
