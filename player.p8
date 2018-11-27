@@ -117,6 +117,7 @@ function update_stars()
   end
 
   if tablelength(enemies) <= 0 then
+    printh("here in respawn")
     respawn()
   end
 
@@ -133,6 +134,10 @@ function update_stars()
     end
 
     --skipping delete
+    if enemy.y > 320 then
+      del(enemies,enemy)
+    end
+    -- printh(tablelength(enemies))
   end
   -- for st in all(stars) do
   --  st.y += st.s
@@ -173,9 +178,9 @@ function respawn()
      sprite_number=5,
      -- mx=i*16,
      -- my=20-i*8,
-     mx=620,
-     my=280,
-     d=280,
+     mx=620-i*8,
+     my=280-i*8,
+     d=d,
      x=-32,
      y=-32,
      r=12,
