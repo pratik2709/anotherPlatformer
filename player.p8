@@ -607,9 +607,9 @@ function player:draw()
     spr(033,self.x, self.y, 1, 1, true)
    end
   elseif self.dx>0 then
-    anim(self,033,037,10,false)
+    anim(self,033,5,10,false)
   else
-    anim(self,033,037,10,true)
+    anim(self,033,5,10,true)
   end
  end
 
