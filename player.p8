@@ -5,7 +5,7 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level=2,
+ level=1,
 }
 player = {}
 baddie={}
@@ -13,7 +13,9 @@ baddies = {}
 cam = {}
 function draw_debug()
  -- do something
- print(player1.x,player1:getx(),(player1.y-mapheight)-10,11)
+ print(player1.invuln,player1:getx(),(player1.y-mapheight)-10,11)
+ print(player_lives,player1:getx(),(player1.y-mapheight)-20,11)
+ print(player1.invtimer,player1:getx(),(player1.y-mapheight)-30,11)
 end
 
 function cam:new(mapwidth, mapheight)
@@ -51,6 +53,7 @@ end
 
 function _init()
   t=0
+  player_lives = 5
   mapwidth = 128
   mapheight = 64
   mycam = cam:new(mapwidth, mapheight)
@@ -189,7 +192,6 @@ function initialize_shooter()
     sprite_number=4,
     x=80*8,
     y=62*8,
-    health=4,
     p=0,
     t=0,
     imm=false,
@@ -205,7 +207,7 @@ function initialize_shooter()
   explosions={}
   stars = {}
   initialize_stars()
-  j = 1
+  transitionSpeed = 3
 end
 
 function initialize_stars()
@@ -298,13 +300,12 @@ function update_shooter()
     ex.t+=1
     if ex.t == 13
       then
-      del(explosions, ex)  
+      del(explosions, ex)
     end
   end
 
   if ship.y > (40*8 - 40) then
-     ship.y -= j
-     j+=1
+     ship.y -= transitionSpeed
    end
    mycam:followplayer(ship.x, ship.y)
 
@@ -320,10 +321,7 @@ function update_shooter()
     enemy.y = enemy.r*cos(t/50) + enemy.my
     if shooter_collision(ship, enemy) and not ship.imm then
       ship.imm = true
-      ship.health -= 1
-      if ship.health <= 0 then
-        game_over()
-      end
+      player_lives -= 1
     end
 
     --skipping delete
@@ -393,7 +391,15 @@ function _update()
     update_stars()
     update_shooter()
   end
+  updatePlayerLives()
 end
+
+function updatePlayerLives()
+  if player_lives <= 0 then
+    -- game_over()
+  end
+end
+
 
 function _draw()
  cls()
@@ -407,7 +413,7 @@ function _draw()
  elseif globals.level==2 then
    draw_shooter()
  end
- -- player1:drawlives()
+ player1:drawlives()
  draw_debug()
 end
 
@@ -489,9 +495,8 @@ function checkwallcollision(actor)
 end
 
 function player:drawlives()
-	for i=1, self.lives do
-    printh(self.lives)
-		spr(001,mycam.x+64+(i)*8,mycam.y+64)
+	for i=1, player_lives do
+		spr(0,mycam.x+64+(i)*8,mycam.y+64)
 	end
 end
 
@@ -524,7 +529,7 @@ function player:new(x, y)
 
  o.bad = false
  o.invuln = false
- o.invtimer = false
+ o.invtimer = 0
 
  return o
 end
@@ -593,8 +598,6 @@ function collide(agent,vx,vy,collide_condition)
 	 		return true
 	 	end
   end
-
-
 
  	-- no hits have been returned
 	return false
@@ -665,18 +668,6 @@ function player:move()
    end
  end
 
-
-
---  if player.sliding then
---   -- walljump
---   --todo: no idea
---   self.dy-=3
---   self.dy=mid(self.dy,-1,-3)
---   self.dx=self.slidedir*2
---   -- self.flipx=(self.slidedir==-1)
--- end
-
-
 end
 
 function player:draw()
@@ -716,11 +707,10 @@ function player:draw()
 end
 
 function player:actorenemycollision(actor)
- if actorcollide(self, actor)
-  and not self.invuln then
-  self.lives-=1
+ if actorcollide(self, actor) and not self.invuln then
+  player_lives-=1
   self.invuln=true
-  self.invtimer=500
+  self.invtimer=100000
  end
 end
 
@@ -730,8 +720,6 @@ function player:update()
   self.invuln = false
  end
 end
-
-
 
 --**************************collision related
 function intersect(min1, max1, min2, max2)
