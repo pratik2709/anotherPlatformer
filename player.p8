@@ -272,11 +272,10 @@ function respawn()
   local number_of_enemies = flr(rnd(9)) + 2
   for i=1,number_of_enemies do
     local d = -1
-
     local e = {
      sprite_number=5,
-     mx=ship.x+64-i*8,
-     my=ship.y-i*8-200,
+     mx=(ship.x-10)-(i*8),
+     my=ship.y-i*8-100,
      d=d,
      x=-32,
      y=-32,
@@ -326,7 +325,6 @@ function update_shooter()
       player_lives -= 1
     end
 
-    --skipping delete
     if enemy.y > 320 then
       del(enemies,enemy)
     end
