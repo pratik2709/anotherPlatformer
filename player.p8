@@ -225,46 +225,29 @@ function draw_shooter()
 
   if not ship.imm or t%8 < 4 then
    spr(ship.sprite_number,ship.x,ship.y)
-   print(ship.x, ship.x,ship.y-3)
-   print(ship.y, ship.x+10,ship.y-3)
   end
 
   for enemy in all(enemies) do
     spr(enemy.sprite_number, enemy.x, enemy.y)
   end
+
+  for bullet in all(bullets) do
+   spr(bullet.sprite_number,bullet.x,bullet.y)
+  end
+
+  for explosion in all(explosions) do
+    circ(explosion.x,explosion.y,explosion.t/2,8+explosion.t%3)
+  end
+
 end
 
 function update_stars()
-  t=t+1
   for st in all(stars) do
     st.y += st.s
     if st.y >= 320 then
      st.y = 192
      st.x=rnd(128) + 576
     end
-  end
-
-  if tablelength(enemies) <= 0 then
-    respawn()
-  end
-
-  for enemy in all(enemies) do
-    -- go down
-    enemy.my += 1.3
-    enemy.x = enemy.r*sin(enemy.d*t/50) + enemy.mx
-    enemy.y = enemy.r*cos(t/50) + enemy.my
-    if shooter_collision(ship, enemy) then
-      ship.health -= 1
-      if ship.health <= 0 then
-        game_over()
-      end
-    end
-
-    --skipping delete
-    if enemy.y > 320 then
-      del(enemies,enemy)
-    end
-    -- printh(tablelength(enemies))
   end
 end
 
@@ -288,10 +271,8 @@ function respawn()
 
     local e = {
      sprite_number=5,
-     -- mx=i*16,
-     -- my=20-i*8,
      mx=ship.x+64-i*8,
-     my=ship.y-i*8-500,
+     my=ship.y-i*8-200,
      d=d,
      x=-32,
      y=-32,
@@ -300,6 +281,93 @@ function respawn()
     }
     add(enemies,e)
   end
+end
+
+function update_shooter()
+  t=t+1
+
+  if ship.imm then
+    ship.t += 1
+    if ship.t > 30 then
+      ship.imm = false
+      ship.t = 0
+    end
+  end
+
+  for ex in all(explosions) do
+    ex.t+=1
+    if ex.t == 13
+      then
+      del(explosions, ex)  
+    end
+  end
+
+  if ship.y > (40*8 - 40) then
+     ship.y -= j
+     j+=1
+   end
+   mycam:followplayer(ship.x, ship.y)
+
+
+  if tablelength(enemies) <= 0 then
+    respawn()
+  end
+
+  for enemy in all(enemies) do
+    -- go down
+    enemy.my += 1.3
+    enemy.x = enemy.r*sin(enemy.d*t/50) + enemy.mx
+    enemy.y = enemy.r*cos(t/50) + enemy.my
+    if shooter_collision(ship, enemy) and not ship.imm then
+      ship.imm = true
+      ship.health -= 1
+      if ship.health <= 0 then
+        game_over()
+      end
+    end
+
+    --skipping delete
+    if enemy.y > 320 then
+      del(enemies,enemy)
+    end
+  end
+
+  for bullet in all(bullets) do
+    bullet.x += bullet.dx
+    bullet.y += bullet.dy
+    if bullet.y < (320-128) or bullet.y > 320 then
+      del(bullets,b)
+    end
+    for enemy in all(enemies) do
+      if shooter_collision(bullet, enemy) then
+        del(enemies, enemy)
+        -- ship.p += 1
+        explode(enemy.x, enemy.y)
+      end
+    end
+  end
+
+  if btn(0) then ship.x-=1 end
+  if btn(1) then ship.x+=1 end
+  if btn(2) then ship.y-=1 end
+  if btn(3) then ship.y+=1 end
+  if btnp(4) then fire() end
+end
+
+function explode(x,y)
+  add(explosions,{x=x,y=y,t=0})
+end
+
+function fire()
+  local bullet = {
+    sprite_number=6,
+    x=ship.x,
+    y=ship.y,
+    dx=0,
+    dy=-3,
+    box={x1=2,y1=0,x2=5,y2=4}
+  }
+  add(bullets,bullet)
 end
 
 function tablelength(t)
@@ -350,36 +418,6 @@ function iswall(tile)
   end
 end
 
-function update_shooter()
-  if ship.y > (40*8 - 40) then
-     ship.y -= j
-     j+=1
-   end
-   mycam:followplayer(ship.x, ship.y)
-  -- for bullet in all(bullets) do
-  --   b.x+=b.dx
-  --   b.y+=b.dy
-  --   if b.x < 0 or b.x
-  -- end
-  --controls
-  if btn(0) then ship.x-=1 end
-  if btn(1) then ship.x+=1 end
-  if btn(2) then ship.y-=1 end
-  if btn(3) then ship.y+=1 end
-  if btnp(4) then fire() end
-end
-
-function fire()
-  local bullet = {
-    sprite_number=5,
-    x=ship.x,
-    y=ship.y,
-    dx=0,
-    dy=-3,
-    box={x1=2,y1=0,x2=5,y2=4}
-  }
-  add(bullets,bullet)
-end
 
 --collision code
 function checkwallcollision(actor)
@@ -756,10 +794,10 @@ end
 __gfx__
 00000000888888880000000099999999000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000088888888000000009bbbbbb900c00c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0070070088888888000000009bbbbbb900c00c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0007700088888888000000009bb88bb9cccccccc000bb00000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0007700088888888000000009bb88bb9c999999c000bb00000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0070070088888888000000009bbbbbb9cccccccc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0070070088888888000000009bbbbbb900c00c0000bbbb0000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0007700088888888000000009bb88bb9cccccccc00b8cb0000090000000000000000000000000000000000000000000000000000000000000000000000000000
+0007700088888888000000009bb88bb9c999999c00bc8b0000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0070070088888888000000009bbbbbb9cccccccc00bbbb0000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000088888888000000009bbbbbb90c0cc0c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000888888880000000099999999000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000009900000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
