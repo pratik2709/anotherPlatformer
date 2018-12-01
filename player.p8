@@ -211,14 +211,16 @@ function initialize_shooter()
 end
 
 function initialize_stars()
-  for i=1,128 do
+  for i=1,1024 do
    add(stars,{
-    x=rnd(128) + 576,
-    y=rnd(128) + 192,
+    x=rnd(1024-128),
+    y=rnd(512-128),
     s=rnd(2)+1
    })
   end
 end
+
+
 
 function draw_shooter()
   for st in all(stars) do
@@ -245,11 +247,11 @@ end
 
 function update_stars()
   for st in all(stars) do
-    st.y += st.s
-    if st.y >= 320 then
-     st.y = 192
-     st.x=rnd(128) + 576
-    end
+   st.y += st.s
+   if st.y >= (512-128) then
+    st.y = 0
+    st.x=rnd((1024-128))
+   end
   end
 end
 
