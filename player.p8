@@ -334,7 +334,7 @@ function _update()
   	for i,actor in pairs(baddies) do
   		actor:move()
   		checkwallcollisionEnemy(actor)
-  		-- player1:collide(actor)
+  		player1:actorEnemyCollision(actor)
   	end
   elseif globals.level == 2 then
     update_stars()
@@ -351,11 +351,10 @@ function _draw()
    for i, actor in pairs(baddies) do
  		actor:draw()
  	 end
-
  elseif globals.level==2 then
    draw_shooter()
-
  end
+ player1:drawlives()
  draw_debug()
 end
 
@@ -464,6 +463,12 @@ function checkwallcollision(actor)
 
   actor.dx*=.98
 
+end
+
+function player:drawlives()
+	for i=1, self.lives do
+		spr(001,mycam.x+64,mycam.y+64)
+	end
 end
 
 function player:new(x, y)
@@ -652,6 +657,7 @@ end
 
 function player:draw()
  -- draw only non flash frame
+ -- flash means skip this draw frame
  if self.flash == false then
   --draw the sprite either left or right
   if not self.standing then
@@ -673,9 +679,19 @@ function player:draw()
   end
  end
 
+ if self.invuln == true then
+   if self.flash==true then
+     self.flash = false
+   else
+     self.flash=true
+   end
+ else
+   self.flash=false
+ end
+
 end
 
-function player:collide(actor)
+function player:actorEnemyCollision(actor)
  if actorcollide(self, actor)
   and not self.invuln then
   self.lives-=1
