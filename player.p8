@@ -5,7 +5,7 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level=1,
+ level=2,
 }
 player = {}
 baddie={}
@@ -13,7 +13,7 @@ baddies = {}
 cam = {}
 function draw_debug()
  -- do something
- -- print(player1.hanging,player1:getx(),(player1.y-mapheight)-10,11)
+ print(player1.x,player1:getx(),(player1.y-mapheight)-10,11)
 end
 
 function cam:new(mapwidth, mapheight)
@@ -121,7 +121,7 @@ function spawn_baddies(plyrx)
     end
 end
 
-function checkwallcollisionEnemy(actor)
+function checkwallcollisionenemy(actor)
   actor.standing = false
 
   if actor.hanging then
@@ -266,21 +266,6 @@ function update_stars()
     end
     -- printh(tablelength(enemies))
   end
-  -- for st in all(stars) do
-  --  st.y += st.s
-  --  if st.y <= bound_area.y_min then
-  --    st.y=bound_area.y_min
-  --  end
-  --  if st.y >= bound_area.y_max then
-  --    st.y=bound_area.y_max
-  --  end
-  --  if st.x <= bound_area.x_min then
-  --    st.x=bound_area.x_min
-  --  end
-  --  if st.x >= bound_area.x_max then
-  --    st.x=bound_area.x_max
-  --  end
-  -- end
 end
 
 function game_over()
@@ -305,8 +290,8 @@ function respawn()
      sprite_number=5,
      -- mx=i*16,
      -- my=20-i*8,
-     mx=620-i*8,
-     my=280-i*8,
+     mx=ship.x+64-i*8,
+     my=ship.y-i*8-500,
      d=d,
      x=-32,
      y=-32,
@@ -333,8 +318,8 @@ function _update()
     spawn_baddies(player1:getx())
   	for i,actor in pairs(baddies) do
   		actor:move()
-  		checkwallcollisionEnemy(actor)
-  		player1:actorEnemyCollision(actor)
+  		checkwallcollisionenemy(actor)
+  		player1:actorenemycollision(actor)
   	end
   elseif globals.level == 2 then
     update_stars()
@@ -354,7 +339,7 @@ function _draw()
  elseif globals.level==2 then
    draw_shooter()
  end
- player1:drawlives()
+ -- player1:drawlives()
  draw_debug()
 end
 
@@ -467,7 +452,8 @@ end
 
 function player:drawlives()
 	for i=1, self.lives do
-		spr(001,mycam.x+64,mycam.y+64)
+    printh(self.lives)
+		spr(001,mycam.x+64+(i)*8,mycam.y+64)
 	end
 end
 
@@ -691,12 +677,12 @@ function player:draw()
 
 end
 
-function player:actorEnemyCollision(actor)
+function player:actorenemycollision(actor)
  if actorcollide(self, actor)
   and not self.invuln then
   self.lives-=1
   self.invuln=true
-  self.invtimer=100
+  self.invtimer=500
  end
 end
 
