@@ -685,9 +685,6 @@ function player:move()
    if not btn(0) and not btn(1) then
      self.dx*=.88
    end
-   if btn(5) then
-     fire_player_bullet(self.isfacingright)
-   end
  else
    if btn(0) then
      self.dx-=.85*globals.dt
@@ -695,6 +692,10 @@ function player:move()
    if btn(1) then
      self.dx+=.85*globals.dt
    end
+ end
+
+ if btnp(5) then
+   fire_player_bullet(self.isfacingright)
  end
 
 end
