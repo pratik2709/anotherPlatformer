@@ -10,12 +10,11 @@ globals = {
 player = {}
 baddie={}
 baddies = {}
+player_bullets={}
 cam = {}
 function draw_debug()
  -- do something
- print(player1.invuln,player1:getx(),(player1.y-mapheight)-10,11)
- print(player_lives,player1:getx(),(player1.y-mapheight)-20,11)
- print(player1.invtimer,player1:getx(),(player1.y-mapheight)-30,11)
+
 end
 
 function cam:new(mapwidth, mapheight)
@@ -57,7 +56,7 @@ function _init()
   mapwidth = 128
   mapheight = 64
   mycam = cam:new(mapwidth, mapheight)
-  player1 = player:new(10,10)
+  player1 = player:new(10,0)
   initialize_shooter()
 end
 
@@ -86,6 +85,7 @@ function baddie:new(x,y)
 	o.isfaceright=false
 	o.bounce=true --do we turn around at a wall?
 	o.bad=true
+  o.box={x1=0,y1=0,x2=7,y2=7}
 	return o
 
 end
@@ -349,7 +349,7 @@ function update_shooter()
   if btn(1) then ship.x+=1 end
   if btn(2) then ship.y-=1 end
   if btn(3) then ship.y+=1 end
-  if btnp(4) then fire() end
+  if btnp(5) then fire() end
 end
 
 function explode(x,y)
@@ -400,10 +400,18 @@ function updateplayerlives()
   end
 end
 
+function initial_splash_screen()
+  if not player1.standing then
+    print("Kill 10 enemies in \n 1 minute to complete \n the game",
+       player1:getx() + 20, player1.y,4)
+   end
+end
+
 
 function _draw()
  cls()
  if globals.level==1 then
+   initial_splash_screen()
    mycam:followplayer(player1:getx(), player1.y)
    player1:draw()
    map(0,0,0,0,128,128)
@@ -496,7 +504,7 @@ end
 
 function player:drawlives()
 	for i=1, player_lives do
-		spr(0,mycam.x+64+(i)*8,mycam.y+64)
+		spr(0,mycam.x+(i*8),mycam.y)
 	end
 end
 
@@ -611,6 +619,24 @@ function player:gety()
  return self.y
 end
 
+function fire_player_bullet(isright)
+  local dir = 3
+  if not isright then
+    dir = -3
+  end
+  local bullet = {
+    sprite_number=6,
+    x=player1.x,
+    y=player1.y,
+    w=8,
+    h=8,
+    dx=dir,
+    dy=0,
+    box={x1=2,y1=0,x2=5,y2=4}
+  }
+  add(player_bullets,bullet)
+end
+
 
 function player:move()
  --storing start and end locations
@@ -659,6 +685,9 @@ function player:move()
    if not btn(0) and not btn(1) then
      self.dx*=.88
    end
+   if btn(5) then
+     fire_player_bullet(self.isfacingright)
+   end
  else
    if btn(0) then
      self.dx-=.85*globals.dt
@@ -704,6 +733,10 @@ function player:draw()
    self.flash=false
  end
 
+ for player_bullet in all(player_bullets) do
+  spr(player_bullet.sprite_number,player_bullet.x,player_bullet.y)
+ end
+
 end
 
 function player:actorenemycollision(actor)
@@ -718,6 +751,20 @@ function player:update()
  self.invtimer-=1
  if self.invtimer <= 0 then
   self.invuln = false
+ end
+
+ for player_bullet in all(player_bullets) do
+   player_bullet.x += player_bullet.dx
+   player_bullet.y += player_bullet.dy
+   if collide(player_bullet, sgn(player_bullet.dx),0) then
+     del(player_bullets,player_bullets)
+   end
+   for baddie in all(baddies) do
+     if shooter_collision(baddie, player_bullet) then
+       del(baddies, baddie)
+       -- explode(enemy.x, enemy.y)
+     end
+   end
  end
 end
 
@@ -906,7 +953,7 @@ __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000020202020000000000000000000000000000000000000000000000000
 10101010101010101020202020000020202020202020202020202020200000002000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000001010100000000000000000000000000000000000000000101010
-10101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010
+10101010101010101010101010101010101010101010101010101010101010101010301010101010101010101010101010101010101010101010101010101010
 10101010101010101010301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010
 __label__
 88888888000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
