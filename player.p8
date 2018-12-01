@@ -263,7 +263,7 @@ end
 
 function draw_over()
   cls()
-  print("game over", 50,50,4)
+  print("game over", ship.x,ship.y,4)
 end
 
 function respawn()
@@ -396,7 +396,7 @@ end
 
 function updateplayerlives()
   if player_lives <= 0 then
-    -- game_over()
+    game_over()
   end
 end
 
