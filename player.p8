@@ -207,7 +207,7 @@ function initialize_shooter()
   explosions={}
   stars = {}
   initialize_stars()
-  transitionSpeed = 3
+  transitionspeed = 3
 end
 
 function initialize_stars()
@@ -305,7 +305,7 @@ function update_shooter()
   end
 
   if ship.y > (40*8 - 40) then
-     ship.y -= transitionSpeed
+     ship.y -= transitionspeed
    end
    mycam:followplayer(ship.x, ship.y)
 
@@ -391,10 +391,10 @@ function _update()
     update_stars()
     update_shooter()
   end
-  updatePlayerLives()
+  updateplayerlives()
 end
 
-function updatePlayerLives()
+function updateplayerlives()
   if player_lives <= 0 then
     -- game_over()
   end
@@ -710,12 +710,12 @@ function player:actorenemycollision(actor)
  if actorcollide(self, actor) and not self.invuln then
   player_lives-=1
   self.invuln=true
-  self.invtimer=100000
+  self.invtimer=100
  end
 end
 
 function player:update()
- self.invtimer=-1
+ self.invtimer-=1
  if self.invtimer <= 0 then
   self.invuln = false
  end
