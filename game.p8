@@ -11,388 +11,8 @@ baddie={}
 baddies = {}
 player_bullets={}
 cam = {}
-function draw_debug()
- -- do something
 
-end
-
-function cam:new(mapwidth, mapheight)
- local o = {}
- setmetatable(o,self)
- self.__index=self
- o.x = 0
- o.mapwidth=mapwidth
- o.y = 0
- o.mapheight=mapheight
- return o
-end
-
-function cam:followplayer(playerx, playery)
---right-most bound for x
--- from jelpi game
---128*64 map size
--- cx=mid(cx,64,128*8-64)
--- cy=mid(cy,64,64*8-64)
---64 viewport size to keep centered
---128 may be the resolutions
-  self.x = mid(0,playerx-64,1024-128)
-  self.y = mid(0,((playery)-64),512-128)
-
- camera(self.x,self.y)
-end
-
-function cam:getx()
- return self.x
-end
-
-function cam:reset()
- camera()
-end
-
-function _init()
-  t=0
-  splashscreentimer = 0
-  player_lives = 5
-  mapwidth = 128
-  mapheight = 64
-  mycam = cam:new(mapwidth, mapheight)
-  player1 = player:new(10,0)
-  initialize_shooter()
-end
-
---*****************ground enemy***********************
--- create a baddie
-function baddie:new(x,y)
-	local o={}
-	setmetatable(o, self)
-	self.__index = self
-	o.x=x
-	o.y=y
-  o.w=8
-  o.h=8
-	o.dx=0
-	o.dy=0
-	o.spr=016
-	o.frms=2
-  o.standing=false
-  o.hanging=false
-  o.jumppressed = false
-  o.falltimer = 0
-  o.falltimer = 0
-  o.landtimer = 0
-  o.hurtimer = 0
-  o.jumpvelocity = 4
-	o.isfaceright=false
-	o.bounce=true --do we turn around at a wall?
-	o.bad=true
-  o.box={x1=0,y1=0,x2=7,y2=7}
-	return o
-
-end
-
-function baddie:draw()
-	if self.isfaceright then
-		anim(self,self.spr,self.frms,6,true)
-	else
-		anim(self,self.spr,self.frms,6,false)
-	end
-end
-
-function baddie:move()
-	self.startx=self.x
-	if self.isfaceright then
-		self.dx=1
-	else
-		self.dx=-1
-	end
-	-- updloc(self)
-end
-
-function baddie:update()
-end
-
-function spawn_baddies(plyrx)
-    for y=50,63 do
-     for x=(plyrx/8)-10,(plyrx/8)+10 do
-      val = mget(x,y)
-      if fget(val,2) then
-       local bad = baddie:new(x*8,y*8)
-   		  add(baddies,bad)
-   		   mset(x,y,0)
-      end
-     end
-    end
-end
-
-function checkwallcollisionenemy(actor)
-  actor.standing = false
-
-  if actor.hanging then
-    actor.dx=0
-    actor.dy=0
-  else
-    actor.dy += globals.gravity
-  end
-
-  local steps = abs(actor.dx*globals.dt)
-  for i=0,steps do
-    local d=min(1,steps-i)
-
-    --x axis collision
-    if collide(actor, sgn(actor.dx)*d,0) then
-      actor.dx=0
-      if actor.isfaceright then
-        actor.isfaceright = false
-      else
-        actor.isfaceright = true
-      end
-      break
-    else
-      actor.x+=sgn(actor.dx)*d
-    end
-  end
-
-  --y axis collision
-  steps=abs(actor.dy*globals.dt)
-  for i=0,steps do
-    local d=min(1,steps-i)
-    if collide(actor,0,sgn(actor.dy)*d) then
-       --halt velocity
-      actor.dy=0
-      break
-    else
-      actor.y+=sgn(actor.dy)*d
-    end
-  end
-
-  --standing on something code
-  if collide(actor,0,1) and not actor.hanging then
-    actor.standing=true
-    actor.falltimer=0
-  else
-    actor.falltimer+=1
-  end
-
-  actor.dx*=.98
-
-end
-
-function updloc(actor)
-	--moveleft/right
-	actor.x+=actor.dx
-	--accumulate gravity
-	actor.dy+=globals.gravity
-	--fall
-	actor.y+=actor.dy
-end
---******************shooter*************************
-
-function initialize_shooter()
-  ship = {
-    sprite_number=4,
-    x=35*8,
-    y=62*8,
-    p=0,
-    t=0,
-    imm=false,
-    box = {x1=0,y1=0,x2=7,y2=7}
-  }
-  bound_area = {}
-  bound_area.x_max = (80*8)+(64)
-  bound_area.x_min = (80*8)-(64)
-  bound_area.y_min = (40*8)-(128)
-  bound_area.y_max = (40*8)
-  bullets={}
-  enemies={}
-  explosions={}
-  stars = {}
-  initialize_stars()
-  transitionspeed = 3
-end
-
-function initialize_stars()
-  for i=1,1024 do
-   add(stars,{
-    x=rnd(1024-128),
-    y=rnd(512-128),
-    s=rnd(2)+1
-   })
-  end
-end
-
-
-
-function draw_shooter()
-  for st in all(stars) do
-   pset(st.x,st.y,6)
-  end
-
-  if not ship.imm or t%8 < 4 then
-   spr(ship.sprite_number,ship.x,ship.y)
-  end
-
-  for enemy in all(enemies) do
-    spr(enemy.sprite_number, enemy.x, enemy.y)
-  end
-
-  for bullet in all(bullets) do
-   spr(bullet.sprite_number,bullet.x,bullet.y)
-  end
-
-  for explosion in all(explosions) do
-    circ(explosion.x,explosion.y,explosion.t/2,8+explosion.t%3)
-  end
-
-end
-
-function update_stars()
-  for st in all(stars) do
-   st.y += st.s
-   if st.y >= (512-128) then
-    st.y = 0
-    st.x=rnd((1024-128))
-   end
-  end
-end
-
-function game_over()
-  _update = update_over
-  _draw = draw_over
-end
-
-function update_over()
-end
-
-function draw_over()
-  cls()
-  print("game over", ship.x,ship.y,4)
-end
-
-function respawn()
-  local number_of_enemies = flr(rnd(9)) + 2
-  for i=1,number_of_enemies do
-    local d = -1
-    local e = {
-     sprite_number=5,
-     mx=(ship.x-10)-(i*8),
-     my=ship.y-i*8-100,
-     d=d,
-     x=-32,
-     y=-32,
-     r=12,
-     box = {x1=0,y1=0,x2=7,y2=7}
-    }
-    add(enemies,e)
-  end
-end
-
-function update_shooter()
-  t=t+1
-
-  if ship.imm then
-    ship.t += 1
-    if ship.t > 30 then
-      ship.imm = false
-      ship.t = 0
-    end
-  end
-
-  for ex in all(explosions) do
-    ex.t+=1
-    if ex.t == 13
-      then
-      del(explosions, ex)
-    end
-  end
-
-  if ship.y > (40*8 - 40) then
-     ship.y -= transitionspeed
-   end
-   mycam:followplayer(ship.x, ship.y)
-
-
-  if tablelength(enemies) <= 0 then
-    respawn()
-  end
-
-  for enemy in all(enemies) do
-    -- go down
-    enemy.my += 1.3
-    enemy.x = enemy.r*sin(enemy.d*t/50) + enemy.mx
-    enemy.y = enemy.r*cos(t/50) + enemy.my
-    if shooter_collision(ship, enemy) and not ship.imm then
-      ship.imm = true
-      player_lives -= 1
-    end
-
-    if enemy.y > 320 then
-      del(enemies,enemy)
-    end
-  end
-
-  for bullet in all(bullets) do
-    bullet.x += bullet.dx
-    bullet.y += bullet.dy
-    if bullet.y < (320-128) or bullet.y > 320 then
-      del(bullets,b)
-    end
-    for enemy in all(enemies) do
-      if shooter_collision(bullet, enemy) then
-        del(enemies, enemy)
-        -- ship.p += 1
-        explode(enemy.x, enemy.y)
-      end
-    end
-  end
-
-  if btn(0) then ship.x-=1 end
-  if btn(1) then ship.x+=1 end
-  if btn(2) then ship.y-=1 end
-  if btn(3) then ship.y+=1 end
-  if btnp(5) then fire() end
-end
-
-function explode(x,y)
-  add(explosions,{x=x,y=y,t=0})
-end
-
-function fire()
-  local bullet = {
-    sprite_number=6,
-    x=ship.x,
-    y=ship.y,
-    dx=0,
-    dy=-3,
-    box={x1=2,y1=0,x2=5,y2=4}
-  }
-  add(bullets,bullet)
-end
-
-function tablelength(t)
-  local count = 0
-  for _ in pairs(t) do count = count + 1 end
-  return count
-end
-
---*******************************************
-
-function _update()
-  if globals.level == 1 then
-    player1:move()
-    player1:update()
-    checkwallcollision(player1)
-    spawn_baddies(player1:getx())
-  	for i,actor in pairs(baddies) do
-  		actor:move()
-  		checkwallcollisionenemy(actor)
-  		player1:actorenemycollision(actor)
-  	end
-  elseif globals.level == 2 then
-    update_stars()
-    update_shooter()
-  end
-  updateplayerlives()
-end
+ -- **************player.p8****************
 
 function updateplayerlives()
   if player_lives <= 0 then
@@ -406,25 +26,6 @@ function initial_splash_screen()
     print("Starting soon \n Get Ready!",
        player1:getx() + 20, player1.y,4)
    end
-end
-
-
-function _draw()
- cls()
- if globals.level==1 then
-   initial_splash_screen()
-   mycam:followplayer(player1:getx(), player1.y)
-   player1:draw()
-   map(0,0,0,0,128,128)
-   for i, actor in pairs(baddies) do
- 		actor:draw()
- 	 end
- elseif globals.level==2 then
-   map(0,0,0,0,128,128)
-   draw_shooter()
- end
- player1:drawlives()
- draw_debug()
 end
 
 
@@ -771,7 +372,412 @@ function player:update()
  end
 end
 
---**************************collision related
+
+
+
+
+
+ -- **************camera.p8****************
+
+function cam:new(mapwidth, mapheight)
+ local o = {}
+ setmetatable(o,self)
+ self.__index=self
+ o.x = 0
+ o.mapwidth=mapwidth
+ o.y = 0
+ o.mapheight=mapheight
+ return o
+end
+
+function cam:followplayer(playerx, playery)
+--right-most bound for x
+-- from jelpi game
+--128*64 map size
+-- cx=mid(cx,64,128*8-64)
+-- cy=mid(cy,64,64*8-64)
+--64 viewport size to keep centered
+--128 may be the resolutions
+  self.x = mid(0,playerx-64,1024-128)
+  self.y = mid(0,((playery)-64),512-128)
+
+ camera(self.x,self.y)
+end
+
+function cam:getx()
+ return self.x
+end
+
+function cam:reset()
+ camera()
+end
+
+ -- **************main.p8****************
+
+function _init()
+  t=0
+  splashscreentimer = 0
+  player_lives = 5
+  mapwidth = 128
+  mapheight = 64
+  mycam = cam:new(mapwidth, mapheight)
+  player1 = player:new(10,0)
+  initialize_shooter()
+end
+
+
+function _update()
+  if globals.level == 1 then
+    player1:move()
+    player1:update()
+    checkwallcollision(player1)
+    spawn_baddies(player1:getx())
+  	for i,actor in pairs(baddies) do
+  		actor:move()
+  		checkwallcollisionenemy(actor)
+  		player1:actorenemycollision(actor)
+  	end
+  elseif globals.level == 2 then
+    update_stars()
+    update_shooter()
+  end
+  updateplayerlives()
+end
+
+
+function _draw()
+ cls()
+ if globals.level==1 then
+   initial_splash_screen()
+   mycam:followplayer(player1:getx(), player1.y)
+   player1:draw()
+   map(0,0,0,0,128,128)
+   for i, actor in pairs(baddies) do
+ 		actor:draw()
+ 	 end
+ elseif globals.level==2 then
+   map(0,0,0,0,128,128)
+   draw_shooter()
+ end
+ player1:drawlives()
+ draw_debug()
+end
+
+function draw_debug()
+ -- do something
+
+end
+
+ -- **************shooter.p8****************
+
+
+function initialize_shooter()
+  ship = {
+    sprite_number=4,
+    x=35*8,
+    y=62*8,
+    p=0,
+    t=0,
+    imm=false,
+    box = {x1=0,y1=0,x2=7,y2=7}
+  }
+  bound_area = {}
+  bound_area.x_max = (80*8)+(64)
+  bound_area.x_min = (80*8)-(64)
+  bound_area.y_min = (40*8)-(128)
+  bound_area.y_max = (40*8)
+  bullets={}
+  enemies={}
+  explosions={}
+  stars = {}
+  initialize_stars()
+  transitionspeed = 3
+end
+
+function initialize_stars()
+  for i=1,1024 do
+   add(stars,{
+    x=rnd(1024-128),
+    y=rnd(512-128),
+    s=rnd(2)+1
+   })
+  end
+end
+
+
+
+function draw_shooter()
+  for st in all(stars) do
+   pset(st.x,st.y,6)
+  end
+
+  if not ship.imm or t%8 < 4 then
+   spr(ship.sprite_number,ship.x,ship.y)
+  end
+
+  for enemy in all(enemies) do
+    spr(enemy.sprite_number, enemy.x, enemy.y)
+  end
+
+  for bullet in all(bullets) do
+   spr(bullet.sprite_number,bullet.x,bullet.y)
+  end
+
+  for explosion in all(explosions) do
+    circ(explosion.x,explosion.y,explosion.t/2,8+explosion.t%3)
+  end
+
+end
+
+function update_stars()
+  for st in all(stars) do
+   st.y += st.s
+   if st.y >= (512-128) then
+    st.y = 0
+    st.x=rnd((1024-128))
+   end
+  end
+end
+
+function game_over()
+  _update = update_over
+  _draw = draw_over
+end
+
+function update_over()
+end
+
+function draw_over()
+  cls()
+  print("game over", ship.x,ship.y,4)
+end
+
+function respawn()
+  local number_of_enemies = flr(rnd(9)) + 2
+  for i=1,number_of_enemies do
+    local d = -1
+    local e = {
+     sprite_number=5,
+     mx=(ship.x-10)-(i*8),
+     my=ship.y-i*8-100,
+     d=d,
+     x=-32,
+     y=-32,
+     r=12,
+     box = {x1=0,y1=0,x2=7,y2=7}
+    }
+    add(enemies,e)
+  end
+end
+
+function update_shooter()
+  t=t+1
+
+  if ship.imm then
+    ship.t += 1
+    if ship.t > 30 then
+      ship.imm = false
+      ship.t = 0
+    end
+  end
+
+  for ex in all(explosions) do
+    ex.t+=1
+    if ex.t == 13
+      then
+      del(explosions, ex)
+    end
+  end
+
+  if ship.y > (40*8 - 40) then
+     ship.y -= transitionspeed
+   end
+   mycam:followplayer(ship.x, ship.y)
+
+
+  if tablelength(enemies) <= 0 then
+    respawn()
+  end
+
+  for enemy in all(enemies) do
+    -- go down
+    enemy.my += 1.3
+    enemy.x = enemy.r*sin(enemy.d*t/50) + enemy.mx
+    enemy.y = enemy.r*cos(t/50) + enemy.my
+    if shooter_collision(ship, enemy) and not ship.imm then
+      ship.imm = true
+      player_lives -= 1
+    end
+
+    if enemy.y > 320 then
+      del(enemies,enemy)
+    end
+  end
+
+  for bullet in all(bullets) do
+    bullet.x += bullet.dx
+    bullet.y += bullet.dy
+    if bullet.y < (320-128) or bullet.y > 320 then
+      del(bullets,b)
+    end
+    for enemy in all(enemies) do
+      if shooter_collision(bullet, enemy) then
+        del(enemies, enemy)
+        -- ship.p += 1
+        explode(enemy.x, enemy.y)
+      end
+    end
+  end
+
+  if btn(0) then ship.x-=1 end
+  if btn(1) then ship.x+=1 end
+  if btn(2) then ship.y-=1 end
+  if btn(3) then ship.y+=1 end
+  if btnp(5) then fire() end
+end
+
+function explode(x,y)
+  add(explosions,{x=x,y=y,t=0})
+end
+
+function fire()
+  local bullet = {
+    sprite_number=6,
+    x=ship.x,
+    y=ship.y,
+    dx=0,
+    dy=-3,
+    box={x1=2,y1=0,x2=5,y2=4}
+  }
+  add(bullets,bullet)
+end
+
+function tablelength(t)
+  local count = 0
+  for _ in pairs(t) do count = count + 1 end
+  return count
+end
+
+
+ -- **************ground_enemy.p8****************
+
+-- create a baddie
+function baddie:new(x,y)
+	local o={}
+	setmetatable(o, self)
+	self.__index = self
+	o.x=x
+	o.y=y
+  o.w=8
+  o.h=8
+	o.dx=0
+	o.dy=0
+	o.spr=016
+	o.frms=2
+  o.standing=false
+  o.hanging=false
+  o.jumppressed = false
+  o.falltimer = 0
+  o.falltimer = 0
+  o.landtimer = 0
+  o.hurtimer = 0
+  o.jumpvelocity = 4
+	o.isfaceright=false
+	o.bounce=true --do we turn around at a wall?
+	o.bad=true
+  o.box={x1=0,y1=0,x2=7,y2=7}
+	return o
+
+end
+
+function baddie:draw()
+	if self.isfaceright then
+		anim(self,self.spr,self.frms,6,true)
+	else
+		anim(self,self.spr,self.frms,6,false)
+	end
+end
+
+function baddie:move()
+	self.startx=self.x
+	if self.isfaceright then
+		self.dx=1
+	else
+		self.dx=-1
+	end
+end
+
+function baddie:update()
+end
+
+function spawn_baddies(plyrx)
+    for y=50,63 do
+     for x=(plyrx/8)-10,(plyrx/8)+10 do
+      val = mget(x,y)
+      if fget(val,2) then
+       local bad = baddie:new(x*8,y*8)
+   		  add(baddies,bad)
+   		   mset(x,y,0)
+      end
+     end
+    end
+end
+
+function checkwallcollisionenemy(actor)
+  actor.standing = false
+
+  if actor.hanging then
+    actor.dx=0
+    actor.dy=0
+  else
+    actor.dy += globals.gravity
+  end
+
+  local steps = abs(actor.dx*globals.dt)
+  for i=0,steps do
+    local d=min(1,steps-i)
+
+    --x axis collision
+    if collide(actor, sgn(actor.dx)*d,0) then
+      actor.dx=0
+      if actor.isfaceright then
+        actor.isfaceright = false
+      else
+        actor.isfaceright = true
+      end
+      break
+    else
+      actor.x+=sgn(actor.dx)*d
+    end
+  end
+
+  --y axis collision
+  steps=abs(actor.dy*globals.dt)
+  for i=0,steps do
+    local d=min(1,steps-i)
+    if collide(actor,0,sgn(actor.dy)*d) then
+       --halt velocity
+      actor.dy=0
+      break
+    else
+      actor.y+=sgn(actor.dy)*d
+    end
+  end
+
+  --standing on something code
+  if collide(actor,0,1) and not actor.hanging then
+    actor.standing=true
+    actor.falltimer=0
+  else
+    actor.falltimer+=1
+  end
+
+  actor.dx*=.98
+
+end
+
+ -- **************collision.p8****************
+
 function intersect(min1, max1, min2, max2)
  return max(min1, max1) > min(min2, max2) and
         min(min1, max1) < max(min2,max2)
@@ -828,6 +834,7 @@ function anim(actor, start_frame, number_of_frames,
 
 end
 
+ -- **************gfx.p8****************
 
 __gfx__
 000000000cccccc000000000999999990000000000000000000000000aaaaaa00000000000000000000000000000000000000000000000000000000000000000
