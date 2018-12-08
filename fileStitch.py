@@ -3,7 +3,7 @@ import os
 
 
 items = os.listdir("src/")
-f = open("bigfile.p8", "w")
+f = open("game.p8", "w")
 
 header= open("src/headers.p8", 'r')
 f.write(header.read())
