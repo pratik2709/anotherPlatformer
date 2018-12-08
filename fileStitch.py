@@ -21,4 +21,5 @@ for item in items:
 f.write("\n\n -- **************" + "gfx.p8" + "****************\n\n")
 footer= open("src/gfx.p8", 'r')
 f.write(footer.read())
+footer.close()
 f.close()
