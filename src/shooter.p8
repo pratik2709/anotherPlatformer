@@ -83,6 +83,7 @@ end
 function respawn()
   local number_of_enemies = flr(rnd(9)) + 2
   for i=1,number_of_enemies do
+    globals.enemies += 1
     local d = -1
     local e = {
      sprite_number=5,
@@ -122,9 +123,13 @@ function update_shooter()
    end
    mycam:followplayer(ship.x, ship.y)
 
-
-  if tablelength(enemies) <= 0 then
+  local number_of_enemies = tablelength(enemies)
+  if number_of_enemies <= 0 and globals.enemies <= 50 then
     respawn()
+  end
+
+  if globals.enemies > 50 then
+    globals.level=3
   end
 
   for enemy in all(enemies) do

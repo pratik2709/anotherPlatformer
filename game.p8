@@ -4,13 +4,15 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level=1,
+ level=2,
+ enemies=0,
 }
 player = {}
 baddie={}
 baddies = {}
 player_bullets={}
 cam = {}
+
 
  -- **************player.p8****************
 
@@ -478,6 +480,9 @@ function _update()
   elseif globals.level == 2 then
     update_stars()
     update_shooter()
+  elseif globals.level == 3 then
+    update_stars()
+    update_shooter()
   end
   updateplayerlives()
 end
@@ -496,6 +501,9 @@ function _draw()
  elseif globals.level==2 then
    map(0,0,0,0,128,128)
    draw_shooter()
+ elseif globals.level==3 then
+   map(0,0,0,0,128,128)
+   draw_shooter()
  end
  player1:drawlives()
  draw_debug()
@@ -503,6 +511,9 @@ end
 
 function draw_debug()
  -- do something
+ -- print(globals.enemies,ship:x,(ship.y-mapheight)-10,11)
+ print(globals.enemies,ship.x,(ship.y-10),11)
+ print(globals.level,ship.x,(ship.y-20),11)
 
 end
 
@@ -594,6 +605,7 @@ end
 function respawn()
   local number_of_enemies = flr(rnd(9)) + 2
   for i=1,number_of_enemies do
+    globals.enemies += 1
     local d = -1
     local e = {
      sprite_number=5,
@@ -633,9 +645,13 @@ function update_shooter()
    end
    mycam:followplayer(ship.x, ship.y)
 
-
-  if tablelength(enemies) <= 0 then
+  local number_of_enemies = tablelength(enemies)
+  if number_of_enemies <= 0 and globals.enemies <= 50 then
     respawn()
+  end
+
+  if globals.enemies > 50 then
+    globals.level=3
   end
 
   for enemy in all(enemies) do
@@ -819,6 +835,11 @@ function checkwallcollisionenemy(actor)
   actor.dx*=.98
 
 end
+
+
+ -- **************boss.p8****************
+
+--__lua__
 
 
  -- **************collision.p8****************

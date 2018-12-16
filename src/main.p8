@@ -25,6 +25,9 @@ function _update()
   elseif globals.level == 2 then
     update_stars()
     update_shooter()
+  elseif globals.level == 3 then
+    update_stars()
+    update_shooter()
   end
   updateplayerlives()
 end
@@ -43,6 +46,9 @@ function _draw()
  elseif globals.level==2 then
    map(0,0,0,0,128,128)
    draw_shooter()
+ elseif globals.level==3 then
+   map(0,0,0,0,128,128)
+   draw_shooter()
  end
  player1:drawlives()
  draw_debug()
@@ -50,5 +56,8 @@ end
 
 function draw_debug()
  -- do something
+ -- print(globals.enemies,ship:x,(ship.y-mapheight)-10,11)
+ print(globals.enemies,ship.x,(ship.y-10),11)
+ print(globals.level,ship.x,(ship.y-20),11)
 
 end
