@@ -39,16 +39,15 @@ end
 
 -- object, starting frame, number of frames,
 -- animation speed, flip
-function anim(actor, start_frame, number_of_frames, anim_speed, flipper)
+function anim(actor, anim_speed, flipper)
  if(not actor.current_tile) actor.current_tile = 0
- actor.current_tile+=8
+
  if(actor.current_tile%(30/anim_speed)==0) then
-  if(actor.sx==(start_frame+(8*(number_of_frames-1)))) then
-   actor.sx = start_frame
-  end
   actor.sx = actor.sx + 8
+  if(actor.sx==(actor.start_frame+(8*(actor.number_of_frames)))) then
+   actor.sx = actor.start_frame
+  end
  end
- -- spr(actor.frame,actor.x,actor.y,1,1,flipper)
  sspr(actor.sx,
       actor.sy,
       actor.w,actor.h,
@@ -56,5 +55,8 @@ function anim(actor, start_frame, number_of_frames, anim_speed, flipper)
       actor.y,
       actor.w,actor.h,
       flipper)
+ -- spr(actor.frame,actor.x,actor.y,1,1,flipper)
+
+ actor.current_tile+=8
 
 end

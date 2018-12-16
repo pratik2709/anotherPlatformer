@@ -123,8 +123,11 @@ function player:new(x, y)
  o.dy = 0
  o.w=4
  o.h=7
+
  o.sx = 10
  o.sy = 17
+ o.start_frame = 10
+ o.number_of_frames = 5
 
  o.standing=false
  o.hanging=false
@@ -349,9 +352,9 @@ function player:draw()
           true)
    end
   elseif self.dx>0 then
-    anim(self,10,5,10,false)
+    anim(self,10,false)
   else
-    anim(self,10,5,10,true)
+    anim(self,10,true)
   end
  end
 
@@ -708,7 +711,9 @@ function baddie:new(x,y)
   o.w=8
   o.h=8
 	o.sx = 0
-	o.sy = 0
+	o.sy = 8
+	o.start_frame = 0
+	o.number_of_frames = 2
 	o.dx=0
 	o.dy=0
 	o.spr=016
@@ -731,9 +736,9 @@ end
 
 function baddie:draw()
 	if self.isfaceright then
-		anim(self,self.spr,self.frms,6,true)
+		anim(self,2,true)
 	else
-		anim(self,self.spr,self.frms,6,false)
+		anim(self,2,false)
 	end
 end
 
@@ -859,16 +864,15 @@ end
 
 -- object, starting frame, number of frames,
 -- animation speed, flip
-function anim(actor, start_frame, number_of_frames, anim_speed, flipper)
+function anim(actor, anim_speed, flipper)
  if(not actor.current_tile) actor.current_tile = 0
- actor.current_tile+=8
+
  if(actor.current_tile%(30/anim_speed)==0) then
-  if(actor.sx==(start_frame+(8*(number_of_frames-1)))) then
-   actor.sx = start_frame
-  end
   actor.sx = actor.sx + 8
+  if(actor.sx==(actor.start_frame+(8*(actor.number_of_frames)))) then
+   actor.sx = actor.start_frame
+  end
  end
- -- spr(actor.frame,actor.x,actor.y,1,1,flipper)
  sspr(actor.sx,
       actor.sy,
       actor.w,actor.h,
@@ -876,6 +880,9 @@ function anim(actor, start_frame, number_of_frames, anim_speed, flipper)
       actor.y,
       actor.w,actor.h,
       flipper)
+ -- spr(actor.frame,actor.x,actor.y,1,1,flipper)
+
+ actor.current_tile+=8
 
 end
 

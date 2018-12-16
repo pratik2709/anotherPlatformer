@@ -9,7 +9,9 @@ function baddie:new(x,y)
   o.w=8
   o.h=8
 	o.sx = 0
-	o.sy = 0
+	o.sy = 8
+	o.start_frame = 0
+	o.number_of_frames = 2
 	o.dx=0
 	o.dy=0
 	o.spr=016
@@ -32,9 +34,9 @@ end
 
 function baddie:draw()
 	if self.isfaceright then
-		anim(self,self.spr,self.frms,6,true)
+		anim(self,2,true)
 	else
-		anim(self,self.spr,self.frms,6,false)
+		anim(self,2,false)
 	end
 end
 
