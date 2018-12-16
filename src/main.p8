@@ -1,3 +1,4 @@
+--__lua__
 function _init()
   t=0
   splashscreentimer = 0

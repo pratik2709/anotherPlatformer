@@ -1,4 +1,4 @@
-
+--__lua__
 function initialize_shooter()
   ship = {
     sprite_number=4,

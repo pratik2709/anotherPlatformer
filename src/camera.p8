@@ -1,3 +1,4 @@
+--__lua__
 function cam:new(mapwidth, mapheight)
  local o = {}
  setmetatable(o,self)

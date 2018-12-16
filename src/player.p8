@@ -1,3 +1,5 @@
+--__lua__
+
 function updateplayerlives()
   if player_lives <= 0 then
     game_over()
@@ -355,7 +357,3 @@ function player:update()
    end
  end
 end
-
-
-
-

@@ -1,3 +1,4 @@
+--__lua__
 function intersect(min1, max1, min2, max2)
  return max(min1, max1) > min(min2, max2) and
         min(min1, max1) < max(min2,max2)

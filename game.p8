@@ -14,6 +14,8 @@ cam = {}
 
  -- **************player.p8****************
 
+--__lua__
+
 function updateplayerlives()
   if player_lives <= 0 then
     game_over()
@@ -373,10 +375,6 @@ function player:update()
 end
 
 
-
-
-
-
  -- **************camera.p8****************
 
 function cam:new(mapwidth, mapheight)
@@ -414,6 +412,7 @@ end
 
  -- **************main.p8****************
 
+--__lua__
 function _init()
   t=0
   splashscreentimer = 0
@@ -467,6 +466,7 @@ function draw_debug()
  -- do something
 
 end
+
 
  -- **************shooter.p8****************
 

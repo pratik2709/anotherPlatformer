@@ -1,3 +1,4 @@
+--__lua__
 -- create a baddie
 function baddie:new(x,y)
 	local o={}
