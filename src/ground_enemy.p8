@@ -8,6 +8,8 @@ function baddie:new(x,y)
 	o.y=y
   o.w=8
   o.h=8
+	o.sx = 0
+	o.sy = 0
 	o.dx=0
 	o.dy=0
 	o.spr=016

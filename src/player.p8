@@ -107,6 +107,8 @@ function player:new(x, y)
  o.dy = 0
  o.w=4
  o.h=7
+ o.sx = 10
+ o.sy = 17
 
  o.standing=false
  o.hanging=false
@@ -331,9 +333,9 @@ function player:draw()
           true)
    end
   elseif self.dx>0 then
-    anim(self,033,5,10,false)
+    anim(self,10,5,10,false)
   else
-    anim(self,033,5,10,true)
+    anim(self,10,5,10,true)
   end
  end
 
