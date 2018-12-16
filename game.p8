@@ -177,9 +177,9 @@ function collide(agent,vx,vy,collide_condition)
       y2=agent.y
       x2=agent.x
     else
-      y1=agent.y+sgn(vy)*agent.h
+      y1=agent.y + agent.h
       x1=agent.x + agent.w
-      y2=agent.y+sgn(vy)*agent.h
+      y2=agent.y + agent.h
       x2=agent.x
     end
 	end
@@ -312,15 +312,39 @@ function player:draw()
   --draw the sprite either left or right
   if not self.standing then
    if self.isfacingright then
-    spr(033,self.x, self.y, 1, 1, false)
+     sspr(10,
+          17,
+          self.w,self.h,
+          self.x,
+          self.y,
+          self.w,self.h,
+          false)
    else
-    spr(033,self.x, self.y, 1, 1, true)
+     sspr(10,
+          17,
+          self.w,self.h,
+          self.x,
+          self.y,
+          self.w,self.h,
+          true)
    end
   elseif self.dx==0 then
    if self.isfacingright then
-    spr(033,self.x, self.y, 1, 1, false)
+     sspr(10,
+          17,
+          self.w,self.h,
+          self.x,
+          self.y,
+          self.w,self.h,
+          false)
    else
-    spr(033,self.x, self.y, 1, 1, true)
+     sspr(10,
+          17,
+          self.w,self.h,
+          self.x,
+          self.y,
+          self.w,self.h,
+          true)
    end
   elseif self.dx>0 then
     anim(self,033,5,10,false)
@@ -328,6 +352,14 @@ function player:draw()
     anim(self,033,5,10,true)
   end
  end
+
+ -- sspr(player.sx,
+ --      player.sy,
+ --      3,5,
+ --      player.x-1,
+ --      player.y-2,
+ --      3,5,
+ --      player.flipx)
 
  if self.invuln == true then
    if self.flash==true then
@@ -377,6 +409,7 @@ end
 
  -- **************camera.p8****************
 
+--__lua__
 function cam:new(mapwidth, mapheight)
  local o = {}
  setmetatable(o,self)
@@ -409,6 +442,7 @@ end
 function cam:reset()
  camera()
 end
+
 
  -- **************main.p8****************
 
@@ -470,7 +504,7 @@ end
 
  -- **************shooter.p8****************
 
-
+--__lua__
 function initialize_shooter()
   ship = {
     sprite_number=4,
@@ -661,6 +695,7 @@ end
 
  -- **************ground_enemy.p8****************
 
+--__lua__
 -- create a baddie
 function baddie:new(x,y)
 	local o={}
@@ -776,8 +811,10 @@ function checkwallcollisionenemy(actor)
 
 end
 
+
  -- **************collision.p8****************
 
+--__lua__
 function intersect(min1, max1, min2, max2)
  return max(min1, max1) > min(min2, max2) and
         min(min1, max1) < max(min2,max2)
@@ -833,6 +870,7 @@ function anim(actor, start_frame, number_of_frames,
  spr(actor.frame,actor.x,actor.y,1,1,flipper)
 
 end
+
 
  -- **************gfx.p8****************
 
