@@ -38,7 +38,6 @@ function draw_shooter()
   drawEnemy()
   drawBullet()
   drawExplosion()
-  drawBoss()
 end
 
 function update_shooter()

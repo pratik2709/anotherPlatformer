@@ -47,7 +47,7 @@ function _draw()
    draw_shooter()
  elseif globals.level==3 then
    map(0,0,0,0,128,128)
-   draw_shooter()
+   battleDraw()
  end
  player1:drawlives()
  draw_debug()

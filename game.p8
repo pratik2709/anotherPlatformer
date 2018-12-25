@@ -4,7 +4,7 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level=1,
+ level=2,
  enemies=0,
 }
 player = {}
@@ -480,11 +480,9 @@ function _update()
   		player1:actorenemycollision(actor)
   	end
   elseif globals.level == 2 then
-    update_stars()
     update_shooter()
   elseif globals.level == 3 then
-    update_stars()
-    update_shooter()
+    updateBossBattle()
   end
   updateplayerlives()
 end
@@ -505,7 +503,7 @@ function _draw()
    draw_shooter()
  elseif globals.level==3 then
    map(0,0,0,0,128,128)
-   draw_shooter()
+   battleDraw()
  end
  player1:drawlives()
  draw_debug()
@@ -562,6 +560,22 @@ function draw_shooter()
   drawEnemy()
   drawBullet()
   drawExplosion()
+end
+
+function update_shooter()
+  update_stars()
+  updateShipInvulnerability()
+  updateShooterExplosions()
+  updateShipTransition()
+  updateCameraPositionForShooter()
+  updateRespawnEnemyStatus()
+  transitionLevel()
+  updateShooterEnemies()
+  updateBulletForShooterEnemies()
+  updateShipButtonState()
+end
+
+function drawBoss()
   if globals.level == 3 then
     boss1:draw()
   end
@@ -637,20 +651,6 @@ function respawn()
     }
     add(enemies,e)
   end
-end
-
-function update_shooter()
-  t=t+1
-  updateShipInvulnerability()
-  updateShooterExplosions()
-  updateShipTransition()
-  updateCameraPositionForShooter()
-  updateRespawnEnemyStatus()
-  transitionLevel()
-  updateShooterEnemies()
-  updateBulletForShooterEnemies()
-  updateShipButtonState()
-
 end
 
 function transitionLevel()
@@ -764,7 +764,7 @@ end
 
 function updateRespawnEnemyStatus ()
   local number_of_enemies = tablelength(enemies)
-  if number_of_enemies <= 0 and globals.enemies <= 50 then
+  if number_of_enemies <= 0 then
     respawn()
   end
 end
@@ -780,8 +780,22 @@ end
 
 __lua__
 
-function battleDraw (args)
+function battleDraw()
+  drawStars()
+  drawShip()
+  drawBullet()
+  drawBoss()
+  drawExplosion()
+end
+
+function updateBossBattle()
   update_stars()
+  updateShipInvulnerability()
+  updateShooterExplosions()
+  updateShipTransition()
+  updateCameraPositionForShooter()
+  updateBulletForShooterEnemies()
+  updateShipButtonState()
 end
 
 
@@ -932,7 +946,6 @@ function boss:new(x,y)
 	o.bad=true
   o.box={x1=0,y1=0,x2=7,y2=7}
 	return o
-
 end
 
 function boss:draw()
@@ -946,12 +959,6 @@ function boss:draw()
 end
 
 function boss:move()
-	self.startx=self.x
-	if self.isfaceright then
-		self.dx=1
-	else
-		self.dx=-1
-	end
 end
 
 function boss:update()

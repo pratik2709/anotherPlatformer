@@ -1,7 +1,11 @@
 __lua__
 
-function battleDraw (args)
-  update_stars()
+function battleDraw()
+  drawStars()
+  drawShip()
+  drawBullet()
+  drawBoss()
+  drawExplosion()
 end
 
 function updateBossBattle()
