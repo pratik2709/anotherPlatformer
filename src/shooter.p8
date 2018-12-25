@@ -32,31 +32,44 @@ function initialize_stars()
   end
 end
 
-
-
 function draw_shooter()
-  for st in all(stars) do
-   pset(st.x,st.y,6)
+  drawStars()
+  drawShip()
+  drawEnemy()
+  drawBullet()
+  drawExplosion()
+  if globals.level == 3 then
+    boss1:draw()
   end
+end
 
-  if not ship.imm or t%8 < 4 then
-   spr(ship.sprite_number,ship.x,ship.y)
-  end
-
-  for enemy in all(enemies) do
-    spr(enemy.sprite_number, enemy.x, enemy.y)
-  end
-
-  for bullet in all(bullets) do
-   spr(bullet.sprite_number,bullet.x,bullet.y)
-  end
-
+function drawExplosion()
   for explosion in all(explosions) do
     circ(explosion.x,explosion.y,explosion.t/2,8+explosion.t%3)
   end
+end
 
-  if globals.level == 3 then
-    boss1:draw()
+function drawStars()
+  for st in all(stars) do
+   pset(st.x,st.y,6)
+  end
+end
+
+function drawShip()
+  if not ship.imm or t%8 < 4 then
+   spr(ship.sprite_number,ship.x,ship.y)
+  end
+end
+
+function drawEnemy (args)
+  for enemy in all(enemies) do
+    spr(enemy.sprite_number, enemy.x, enemy.y)
+  end
+end
+
+function drawBullet()
+  for bullet in all(bullets) do
+   spr(bullet.sprite_number,bullet.x,bullet.y)
   end
 end
 
@@ -104,46 +117,38 @@ end
 
 function update_shooter()
   t=t+1
-
-  if ship.imm then
-    ship.t += 1
-    if ship.t > 30 then
-      ship.imm = false
-      ship.t = 0
-    end
-  end
-
-  for ex in all(explosions) do
-    ex.t+=1
-    if ex.t == 13
-      then
-      del(explosions, ex)
-    end
-  end
-
-  if ship.y > (40*8 - 40) then
-     ship.y -= transitionspeed
-   end
-
-   if globals.level == 3 then
-     mycam:followplayer(ship.x, ship.y-60)
-     boss1.x = ship.x
-     boss1.y = ship.y - 100
-   else
-     mycam:followplayer(ship.x, ship.y)
-   end
-
-   updateRespawnEnemyStatus()
-
-  if globals.enemies > 50 then
-    globals.level=3
-  end
-
-
+  updateShipInvulnerability()
+  updateShooterExplosions()
+  updateShipTransition()
+  updateCameraPositionForShooter()
+  updateRespawnEnemyStatus()
+  transitionLevel()
   updateShooterEnemies()
   updateBulletForShooterEnemies()
   updateShipButtonState()
 
+end
+
+function transitionLevel()
+  if globals.enemies > 50 then
+    globals.level=3
+  end
+end
+
+function updateCameraPositionForShooter()
+  if globals.level == 3 then
+    mycam:followplayer(ship.x, ship.y-60)
+    boss1.x = ship.x
+    boss1.y = ship.y - 100
+  else
+    mycam:followplayer(ship.x, ship.y)
+  end
+end
+
+function updateShipTransition()
+  if ship.y > (40*8 - 40) then
+     ship.y -= transitionspeed
+   end
 end
 
 function explode(x,y)
@@ -160,6 +165,26 @@ function fire()
     box={x1=2,y1=0,x2=5,y2=4}
   }
   add(bullets,bullet)
+end
+
+function updateShooterExplosions()
+  for ex in all(explosions) do
+    ex.t+=1
+    if ex.t == 13
+      then
+      del(explosions, ex)
+    end
+  end
+end
+
+function updateShipInvulnerability ()
+  if ship.imm then
+    ship.t += 1
+    if ship.t > 30 then
+      ship.imm = false
+      ship.t = 0
+    end
+  end
 end
 
 function updateShooterEnemies ()
