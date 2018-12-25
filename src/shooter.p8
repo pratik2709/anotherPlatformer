@@ -38,6 +38,23 @@ function draw_shooter()
   drawEnemy()
   drawBullet()
   drawExplosion()
+  drawBoss()
+end
+
+function update_shooter()
+  update_stars()
+  updateShipInvulnerability()
+  updateShooterExplosions()
+  updateShipTransition()
+  updateCameraPositionForShooter()
+  updateRespawnEnemyStatus()
+  transitionLevel()
+  updateShooterEnemies()
+  updateBulletForShooterEnemies()
+  updateShipButtonState()
+end
+
+function drawBoss()
   if globals.level == 3 then
     boss1:draw()
   end
@@ -113,20 +130,6 @@ function respawn()
     }
     add(enemies,e)
   end
-end
-
-function update_shooter()
-  t=t+1
-  updateShipInvulnerability()
-  updateShooterExplosions()
-  updateShipTransition()
-  updateCameraPositionForShooter()
-  updateRespawnEnemyStatus()
-  transitionLevel()
-  updateShooterEnemies()
-  updateBulletForShooterEnemies()
-  updateShipButtonState()
-
 end
 
 function transitionLevel()
@@ -240,7 +243,7 @@ end
 
 function updateRespawnEnemyStatus ()
   local number_of_enemies = tablelength(enemies)
-  if number_of_enemies <= 0 and globals.enemies <= 50 then
+  if number_of_enemies <= 0 then
     respawn()
   end
 end

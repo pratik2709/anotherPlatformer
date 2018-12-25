@@ -20,7 +20,6 @@ function boss:new(x,y)
 	o.bad=true
   o.box={x1=0,y1=0,x2=7,y2=7}
 	return o
-
 end
 
 function boss:draw()
@@ -34,12 +33,6 @@ function boss:draw()
 end
 
 function boss:move()
-	self.startx=self.x
-	if self.isfaceright then
-		self.dx=1
-	else
-		self.dx=-1
-	end
 end
 
 function boss:update()

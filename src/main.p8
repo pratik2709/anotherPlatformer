@@ -24,11 +24,9 @@ function _update()
   		player1:actorenemycollision(actor)
   	end
   elseif globals.level == 2 then
-    update_stars()
     update_shooter()
   elseif globals.level == 3 then
-    update_stars()
-    update_shooter()
+    updateBossBattle()
   end
   updateplayerlives()
 end
