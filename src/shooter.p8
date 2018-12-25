@@ -55,6 +55,9 @@ function draw_shooter()
     circ(explosion.x,explosion.y,explosion.t/2,8+explosion.t%3)
   end
 
+  if globals.level == 3 then
+    boss1:draw()
+  end
 end
 
 function update_stars()
@@ -121,52 +124,26 @@ function update_shooter()
   if ship.y > (40*8 - 40) then
      ship.y -= transitionspeed
    end
-   mycam:followplayer(ship.x, ship.y)
 
-  local number_of_enemies = tablelength(enemies)
-  if number_of_enemies <= 0 and globals.enemies <= 50 then
-    respawn()
-  end
+   if globals.level == 3 then
+     mycam:followplayer(ship.x, ship.y-60)
+     boss1.x = ship.x
+     boss1.y = ship.y - 100
+   else
+     mycam:followplayer(ship.x, ship.y)
+   end
+
+   updateRespawnEnemyStatus()
 
   if globals.enemies > 50 then
     globals.level=3
   end
 
-  for enemy in all(enemies) do
-    -- go down
-    enemy.my += 1.3
-    enemy.x = enemy.r*sin(enemy.d*t/50) + enemy.mx
-    enemy.y = enemy.r*cos(t/50) + enemy.my
-    if shooter_collision(ship, enemy) and not ship.imm then
-      ship.imm = true
-      player_lives -= 1
-    end
 
-    if enemy.y > 320 then
-      del(enemies,enemy)
-    end
-  end
+  updateShooterEnemies()
+  updateBulletForShooterEnemies()
+  updateShipButtonState()
 
-  for bullet in all(bullets) do
-    bullet.x += bullet.dx
-    bullet.y += bullet.dy
-    if bullet.y < (320-128) or bullet.y > 320 then
-      del(bullets,b)
-    end
-    for enemy in all(enemies) do
-      if shooter_collision(bullet, enemy) then
-        del(enemies, enemy)
-        -- ship.p += 1
-        explode(enemy.x, enemy.y)
-      end
-    end
-  end
-
-  if btn(0) then ship.x-=1 end
-  if btn(1) then ship.x+=1 end
-  if btn(2) then ship.y-=1 end
-  if btn(3) then ship.y+=1 end
-  if btnp(5) then fire() end
 end
 
 function explode(x,y)
@@ -183,6 +160,64 @@ function fire()
     box={x1=2,y1=0,x2=5,y2=4}
   }
   add(bullets,bullet)
+end
+
+function updateShooterEnemies ()
+  for enemy in all(enemies) do
+    -- go down
+    enemy.my += 1.3
+    enemy.x = enemy.r*sin(enemy.d*t/50) + enemy.mx
+    enemy.y = enemy.r*cos(t/50) + enemy.my
+    if shooter_collision(ship, enemy) and not ship.imm then
+      ship.imm = true
+      player_lives -= 1
+    end
+
+    if enemy.y > 320 then
+      del(enemies,enemy)
+    end
+  end
+end
+
+function updateBulletForShooterEnemies()
+  for bullet in all(bullets) do
+    bullet.x += bullet.dx
+    bullet.y += bullet.dy
+    if bullet.y < (320-128) or bullet.y > 320 then
+      del(bullets,b)
+    end
+    for enemy in all(enemies) do
+      if shooter_collision(bullet, enemy) then
+        del(enemies, enemy)
+        -- ship.p += 1
+        explode(enemy.x, enemy.y)
+      end
+    end
+  end
+end
+
+function updateShipButtonState()
+  if btn(0) then ship.x-=1 end
+  if btn(1)
+    then
+      ship.x+=1
+  end
+  if btn(2)
+   then
+     ship.y-=1
+   end
+  if btn(3) and globals.level != 3
+   then
+     ship.y+=1
+   end
+  if btnp(5) then fire() end
+end
+
+function updateRespawnEnemyStatus ()
+  local number_of_enemies = tablelength(enemies)
+  if number_of_enemies <= 0 and globals.enemies <= 50 then
+    respawn()
+  end
 end
 
 function tablelength(t)

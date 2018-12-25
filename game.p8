@@ -4,7 +4,7 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level=2,
+ level=1,
  enemies=0,
 }
 player = {}
@@ -12,6 +12,7 @@ baddie={}
 baddies = {}
 player_bullets={}
 cam = {}
+boss ={}
 
 
  -- **************player.p8****************
@@ -463,6 +464,7 @@ function _init()
   mycam = cam:new(mapwidth, mapheight)
   player1 = player:new(10,0)
   initialize_shooter()
+  boss1 = boss:new(0, 0)
 end
 
 
@@ -577,6 +579,9 @@ function draw_shooter()
     circ(explosion.x,explosion.y,explosion.t/2,8+explosion.t%3)
   end
 
+  if globals.level == 3 then
+    boss1:draw()
+  end
 end
 
 function update_stars()
@@ -643,52 +648,26 @@ function update_shooter()
   if ship.y > (40*8 - 40) then
      ship.y -= transitionspeed
    end
-   mycam:followplayer(ship.x, ship.y)
 
-  local number_of_enemies = tablelength(enemies)
-  if number_of_enemies <= 0 and globals.enemies <= 50 then
-    respawn()
-  end
+   if globals.level == 3 then
+     mycam:followplayer(ship.x, ship.y-60)
+     boss1.x = ship.x
+     boss1.y = ship.y - 100
+   else
+     mycam:followplayer(ship.x, ship.y)
+   end
+
+   updateRespawnEnemyStatus()
 
   if globals.enemies > 50 then
     globals.level=3
   end
 
-  for enemy in all(enemies) do
-    -- go down
-    enemy.my += 1.3
-    enemy.x = enemy.r*sin(enemy.d*t/50) + enemy.mx
-    enemy.y = enemy.r*cos(t/50) + enemy.my
-    if shooter_collision(ship, enemy) and not ship.imm then
-      ship.imm = true
-      player_lives -= 1
-    end
 
-    if enemy.y > 320 then
-      del(enemies,enemy)
-    end
-  end
+  updateShooterEnemies()
+  updateBulletForShooterEnemies()
+  updateShipButtonState()
 
-  for bullet in all(bullets) do
-    bullet.x += bullet.dx
-    bullet.y += bullet.dy
-    if bullet.y < (320-128) or bullet.y > 320 then
-      del(bullets,b)
-    end
-    for enemy in all(enemies) do
-      if shooter_collision(bullet, enemy) then
-        del(enemies, enemy)
-        -- ship.p += 1
-        explode(enemy.x, enemy.y)
-      end
-    end
-  end
-
-  if btn(0) then ship.x-=1 end
-  if btn(1) then ship.x+=1 end
-  if btn(2) then ship.y-=1 end
-  if btn(3) then ship.y+=1 end
-  if btnp(5) then fire() end
 end
 
 function explode(x,y)
@@ -707,10 +686,77 @@ function fire()
   add(bullets,bullet)
 end
 
+function updateShooterEnemies ()
+  for enemy in all(enemies) do
+    -- go down
+    enemy.my += 1.3
+    enemy.x = enemy.r*sin(enemy.d*t/50) + enemy.mx
+    enemy.y = enemy.r*cos(t/50) + enemy.my
+    if shooter_collision(ship, enemy) and not ship.imm then
+      ship.imm = true
+      player_lives -= 1
+    end
+
+    if enemy.y > 320 then
+      del(enemies,enemy)
+    end
+  end
+end
+
+function updateBulletForShooterEnemies()
+  for bullet in all(bullets) do
+    bullet.x += bullet.dx
+    bullet.y += bullet.dy
+    if bullet.y < (320-128) or bullet.y > 320 then
+      del(bullets,b)
+    end
+    for enemy in all(enemies) do
+      if shooter_collision(bullet, enemy) then
+        del(enemies, enemy)
+        -- ship.p += 1
+        explode(enemy.x, enemy.y)
+      end
+    end
+  end
+end
+
+function updateShipButtonState()
+  if btn(0) then ship.x-=1 end
+  if btn(1)
+    then
+      ship.x+=1
+  end
+  if btn(2)
+   then
+     ship.y-=1
+   end
+  if btn(3) and globals.level != 3
+   then
+     ship.y+=1
+   end
+  if btnp(5) then fire() end
+end
+
+function updateRespawnEnemyStatus ()
+  local number_of_enemies = tablelength(enemies)
+  if number_of_enemies <= 0 and globals.enemies <= 50 then
+    respawn()
+  end
+end
+
 function tablelength(t)
   local count = 0
   for _ in pairs(t) do count = count + 1 end
   return count
+end
+
+
+ -- **************bossBattle.p8****************
+
+__lua__
+
+function battleDraw (args)
+  update_stars()
 end
 
 
@@ -840,6 +886,51 @@ end
  -- **************boss.p8****************
 
 --__lua__
+-- create a baddie
+function boss:new(x,y)
+	local o={}
+	setmetatable(o, self)
+	self.__index = self
+	o.x=x
+	o.y=y
+  o.w=8
+  o.h=8
+	o.sx = 64
+	o.sy = 0
+	o.start_frame = 64
+	o.number_of_frames = 2
+	o.dx=0
+	o.dy=0
+  o.hurtimer = 0
+	o.isfaceright=false
+	o.bounce=true --do we turn around at a wall?
+	o.bad=true
+  o.box={x1=0,y1=0,x2=7,y2=7}
+	return o
+
+end
+
+function boss:draw()
+  sspr(self.sx,
+       self.sy,
+       self.w,self.h,
+       self.x,
+       self.y,
+       self.w*10,self.h*10,
+       false)
+end
+
+function boss:move()
+	self.startx=self.x
+	if self.isfaceright then
+		self.dx=1
+	else
+		self.dx=-1
+	end
+end
+
+function boss:update()
+end
 
 
  -- **************collision.p8****************
@@ -912,13 +1003,13 @@ end
 
 __gfx__
 000000000cccccc000000000999999990000000000000000000000000aaaaaa00000000000000000000000000000000000000000000000000000000000000000
-00000000cdddddd1000000009bbbbbb900c00c000000000000000000c99999910000000000000000000000000000000000000000000000000000000000000000
-0aaaaa00cdddddd1000000009bbbbbb900c00c0000bbbb0000000000cdddddd10000000000000000000000000000000000000000000000000000000000000000
-0a1a1a00cdddddd1000000009bb88bb9cccccccc00b8cb0000090000cdddddd10000000000000000000000000000000000000000000000000000000000000000
-0aaaaa00cdddddd1000000009bb88bb9c999999c00bc8b0000000000cdddddd10000000000000000000000000000000000000000000000000000000000000000
-0aaaaa00cdddddd1000000009bbbbbb9cccccccc00bbbb0000000000cdddddd10000000000000000000000000000000000000000000000000000000000000000
-00000000cdddddd1000000009bbbbbb90c0cc0c00000000000000000cdddddd10000000000000000000000000000000000000000000000000000000000000000
-00000000011111100000000099999999000000000000000000000000011111100000000000000000000000000000000000000000000000000000000000000000
+00000000cdddddd1000000009bbbbbb900c00c000000000000000000c99999910888800000000000000000000000000000000000000000000000000000000000
+0aaaaa00cdddddd1000000009bbbbbb900c00c0000bbbb0000000000cdddddd10888880000000000000000000000000000000000000000000000000000000000
+0a1a1a00cdddddd1000000009bb88bb9cccccccc00b8cb0000090000cdddddd10888888000000000000000000000000000000000000000000000000000000000
+0aaaaa00cdddddd1000000009bb88bb9c999999c00bc8b0000000000cdddddd10888880000000000000000000000000000000000000000000000000000000000
+0aaaaa00cdddddd1000000009bbbbbb9cccccccc00bbbb0000000000cdddddd10888880000000000000000000000000000000000000000000000000000000000
+00000000cdddddd1000000009bbbbbb90c0cc0c00000000000000000cdddddd10088880000000000000000000000000000000000000000000000000000000000
+00000000011111100000000099999999000000000000000000000000011111100008800000000000000000000000000000000000000000000000000000000000
 000009900000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00999990000cc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0090990000cc00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

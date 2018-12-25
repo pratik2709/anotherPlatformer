@@ -8,6 +8,7 @@ function _init()
   mycam = cam:new(mapwidth, mapheight)
   player1 = player:new(10,0)
   initialize_shooter()
+  boss1 = boss:new(0, 0)
 end
 
 
