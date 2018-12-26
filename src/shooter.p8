@@ -194,8 +194,8 @@ function updateShooterEnemies ()
   for enemy in all(enemies) do
     -- go down
     enemy.my += 1.3
-    enemy.x = enemy.r*sin(enemy.d*t/50) + enemy.mx
-    enemy.y = enemy.r*cos(t/50) + enemy.my
+    enemy.x = enemy.r*sin(enemy.d*numberOfTicks/50) + enemy.mx
+    enemy.y = enemy.r*cos(numberOfTicks/50) + enemy.my
     if shooter_collision(ship, enemy) and not ship.imm then
       ship.imm = true
       player_lives -= 1

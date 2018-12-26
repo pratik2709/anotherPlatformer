@@ -1,7 +1,7 @@
 --__lua__
 function _init()
   t=0
-  ticks=0
+  numberOfTicks=0
   splashscreentimer = 0
   player_lives = 5
   mapwidth = 128
@@ -14,7 +14,7 @@ end
 
 
 function _update()
-  ticks += 1
+  numberOfTicks += 1
   if globals.level == 1 then
     player1:move()
     player1:update()

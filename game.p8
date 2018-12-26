@@ -457,7 +457,7 @@ end
 --__lua__
 function _init()
   t=0
-  ticks=0
+  numberOfTicks=0
   splashscreentimer = 0
   player_lives = 5
   mapwidth = 128
@@ -470,7 +470,7 @@ end
 
 
 function _update()
-  ticks += 1
+  numberOfTicks += 1
   if globals.level == 1 then
     player1:move()
     player1:update()
@@ -725,8 +725,8 @@ function updateShooterEnemies ()
   for enemy in all(enemies) do
     -- go down
     enemy.my += 1.3
-    enemy.x = enemy.r*sin(enemy.d*t/50) + enemy.mx
-    enemy.y = enemy.r*cos(t/50) + enemy.my
+    enemy.x = enemy.r*sin(enemy.d*numberOfTicks/50) + enemy.mx
+    enemy.y = enemy.r*cos(numberOfTicks/50) + enemy.my
     if shooter_collision(ship, enemy) and not ship.imm then
       ship.imm = true
       player_lives -= 1
@@ -990,18 +990,18 @@ function boss:move()
 	end
 
 	if self.isfaceright then
-		self.x += 1
+		self.x += 2
 	elseif not self.isfaceright then
-		self.x -= 1
+		self.x -= 2
 	end
-	if ship.isfaceright and self.isfaceright then
-		self.x += 3
-	end
-	if not ship.isfaceright and not self.isfaceright then
-		self.x -= 3
-	end
+	-- if ship.isfaceright and self.isfaceright then
+	-- 	self.x += 3
+	-- end
+	-- if not (ship.isfaceright and self.isfaceright) then
+	-- 	self.x -= 3
+	-- end
 
-	self.y =  ship.y - 80
+	self.y =  (ship.y - 30) * sin(((numberOfTicks/100) * 0.5 * 3.14))
 end
 
 function boss:update()
