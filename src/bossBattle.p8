@@ -16,4 +16,6 @@ function updateBossBattle()
   updateCameraPositionForShooter()
   updateBulletForShooterEnemies()
   updateShipButtonState()
+  boss1:spawnInit()
+  boss1:move()
 end

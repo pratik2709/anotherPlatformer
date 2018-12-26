@@ -139,9 +139,9 @@ end
 
 function updateCameraPositionForShooter()
   if globals.level == 3 then
-    mycam:followplayer(ship.x, ship.y-60)
-    boss1.x = ship.x
-    boss1.y = ship.y - 100
+    mycam:followplayer(ship.x, ship.y-50)
+    -- boss1.x = ship.x
+    -- boss1.y = ship.y - 100
   else
     mycam:followplayer(ship.x, ship.y)
   end
