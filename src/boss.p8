@@ -60,7 +60,8 @@ function boss:move()
 	-- 	self.x -= 3
 	-- end
 
-	self.y =  (ship.y - 30) * sin(((numberOfTicks/100) * 0.5 * 3.14))
+	-- self.y =  50 *cos(((numberOfTicks/500) * 0.5 * 3.14)) + (ship.y - 80)
+	self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
 end
 
 function boss:update()
