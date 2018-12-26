@@ -42,9 +42,9 @@ function boss:spawnInit()
 end
 
 function boss:move()
-	if self.x > ship.x+50 then
+	if self.x >= ship.x+50 then
 		self.isfaceright = false
-	elseif self.x < ship.x-50 then
+	elseif self.x <= ship.x-50 then
 		self.isfaceright = true
 	end
 
@@ -53,6 +53,13 @@ function boss:move()
 	elseif not self.isfaceright then
 		self.x -= 1
 	end
+	if ship.isfaceright and self.isfaceright then
+		self.x += 3
+	end
+	if not ship.isfaceright and not self.isfaceright then
+		self.x -= 3
+	end
+
 	self.y =  ship.y - 80
 end
 

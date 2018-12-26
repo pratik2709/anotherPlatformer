@@ -58,7 +58,14 @@ end
 function draw_debug()
  -- do something
  -- print(globals.enemies,ship:x,(ship.y-mapheight)-10,11)
- print(globals.enemies,ship.x,(ship.y-10),11)
- print(globals.level,ship.x,(ship.y-20),11)
+
+
+ -- if ship.isfaceright and self.isfaceright then
+ --   print("YRE",ship.x,(ship.y-20),11)
+ -- end
+
+ if  not ship.isfaceright and  not self.isfaceright then
+   print("YRE",ship.x,(ship.y-20),11)
+ end
 
 end

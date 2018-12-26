@@ -7,6 +7,7 @@ function initialize_shooter()
     p=0,
     t=0,
     imm=false,
+    isfaceright=true,
     box = {x1=0,y1=0,x2=7,y2=7}
   }
   bound_area = {}
@@ -224,10 +225,13 @@ function updateBulletForShooterEnemies()
 end
 
 function updateShipButtonState()
-  if btn(0) then ship.x-=1 end
+  if btn(0) then
+    ship.x-=1
+  end
   if btn(1)
     then
       ship.x+=1
+      ship.isfaceright=true
   end
   if btn(2)
    then

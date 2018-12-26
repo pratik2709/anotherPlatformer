@@ -514,8 +514,15 @@ end
 function draw_debug()
  -- do something
  -- print(globals.enemies,ship:x,(ship.y-mapheight)-10,11)
- print(globals.enemies,ship.x,(ship.y-10),11)
- print(globals.level,ship.x,(ship.y-20),11)
+
+
+ -- if ship.isfaceright and self.isfaceright then
+ --   print("YRE",ship.x,(ship.y-20),11)
+ -- end
+
+ if  not ship.isfaceright and  not self.isfaceright then
+   print("YRE",ship.x,(ship.y-20),11)
+ end
 
 end
 
@@ -531,6 +538,7 @@ function initialize_shooter()
     p=0,
     t=0,
     imm=false,
+    isfaceright=true,
     box = {x1=0,y1=0,x2=7,y2=7}
   }
   bound_area = {}
@@ -748,10 +756,13 @@ function updateBulletForShooterEnemies()
 end
 
 function updateShipButtonState()
-  if btn(0) then ship.x-=1 end
+  if btn(0) then
+    ship.x-=1
+  end
   if btn(1)
     then
       ship.x+=1
+      ship.isfaceright=true
   end
   if btn(2)
    then
@@ -972,9 +983,9 @@ function boss:spawnInit()
 end
 
 function boss:move()
-	if self.x > ship.x+50 then
+	if self.x >= ship.x+50 then
 		self.isfaceright = false
-	elseif self.x < ship.x-50 then
+	elseif self.x <= ship.x-50 then
 		self.isfaceright = true
 	end
 
@@ -983,6 +994,13 @@ function boss:move()
 	elseif not self.isfaceright then
 		self.x -= 1
 	end
+	if ship.isfaceright and self.isfaceright then
+		self.x += 3
+	end
+	if not ship.isfaceright and not self.isfaceright then
+		self.x -= 3
+	end
+
 	self.y =  ship.y - 80
 end
 
