@@ -227,6 +227,7 @@ end
 function updateShipButtonState()
   if btn(0) then
     ship.x-=1
+    ship.isfaceright=false
   end
   if btn(1)
     then
@@ -236,6 +237,7 @@ function updateShipButtonState()
   if btn(2)
    then
      ship.y-=1
+
    end
   if btn(3) and globals.level != 3
    then

@@ -48,20 +48,20 @@ function boss:move()
 		self.isfaceright = true
 	end
 
-	if self.isfaceright then
+	if self.isfaceright and not ship.isfaceright then
+		self.x += 1
+		self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
+	elseif not self.isfaceright and ship.isfaceright then
+		self.x -= 1
+		self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
+	elseif self.isfaceright and ship.isfaceright then
 		self.x += 2
-	elseif not self.isfaceright then
+		self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
+	elseif not self.isfaceright and not ship.isfaceright then
 		self.x -= 2
+		self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
 	end
-	-- if ship.isfaceright and self.isfaceright then
-	-- 	self.x += 3
-	-- end
-	-- if not (ship.isfaceright and self.isfaceright) then
-	-- 	self.x -= 3
-	-- end
 
-	-- self.y =  50 *cos(((numberOfTicks/500) * 0.5 * 3.14)) + (ship.y - 80)
-	self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
 end
 
 function boss:update()

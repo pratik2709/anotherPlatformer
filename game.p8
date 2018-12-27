@@ -4,7 +4,7 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level=2,
+ level=3,
  enemies=0,
 }
 player = {}
@@ -520,7 +520,7 @@ function draw_debug()
  --   print("YRE",ship.x,(ship.y-20),11)
  -- end
 
- if  not ship.isfaceright and  not self.isfaceright then
+ if  not ship.isfaceright and  not boss1.isfaceright then
    print("YRE",ship.x,(ship.y-20),11)
  end
 
@@ -758,6 +758,7 @@ end
 function updateShipButtonState()
   if btn(0) then
     ship.x-=1
+    ship.isfaceright=false
   end
   if btn(1)
     then
@@ -767,6 +768,7 @@ function updateShipButtonState()
   if btn(2)
    then
      ship.y-=1
+
    end
   if btn(3) and globals.level != 3
    then
@@ -989,20 +991,20 @@ function boss:move()
 		self.isfaceright = true
 	end
 
-	if self.isfaceright then
+	if self.isfaceright and not ship.isfaceright then
+		self.x += 1
+		self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
+	elseif not self.isfaceright and ship.isfaceright then
+		self.x -= 1
+		self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
+	elseif self.isfaceright and ship.isfaceright then
 		self.x += 2
-	elseif not self.isfaceright then
+		self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
+	elseif not self.isfaceright and not ship.isfaceright then
 		self.x -= 2
+		self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
 	end
-	-- if ship.isfaceright and self.isfaceright then
-	-- 	self.x += 3
-	-- end
-	-- if not (ship.isfaceright and self.isfaceright) then
-	-- 	self.x -= 3
-	-- end
 
-	-- self.y =  50 *cos(((numberOfTicks/500) * 0.5 * 3.14)) + (ship.y - 80)
-	self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
 end
 
 function boss:update()

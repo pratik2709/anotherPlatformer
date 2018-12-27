@@ -4,7 +4,7 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level=2,
+ level=3,
  enemies=0,
 }
 player = {}
