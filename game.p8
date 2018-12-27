@@ -4,7 +4,7 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level=3,
+ level=1,
  enemies=0,
 }
 player = {}
@@ -584,12 +584,6 @@ function update_shooter()
   updateShipButtonState()
 end
 
-function drawBoss()
-  if globals.level == 3 then
-    boss1:draw()
-  end
-end
-
 function drawExplosion()
   for explosion in all(explosions) do
     circ(explosion.x,explosion.y,explosion.t/2,8+explosion.t%3)
@@ -669,13 +663,7 @@ function transitionLevel()
 end
 
 function updateCameraPositionForShooter()
-  if globals.level == 3 then
-    mycam:followplayer(ship.x, ship.y-50)
-    -- boss1.x = ship.x
-    -- boss1.y = ship.y - 100
-  else
     mycam:followplayer(ship.x, ship.y)
-  end
 end
 
 function updateShipTransition()
@@ -812,7 +800,7 @@ function updateBossBattle()
   updateShipInvulnerability()
   updateShooterExplosions()
   updateShipTransition()
-  updateCameraPositionForShooter()
+  updateCameraPositionOfBossBattle()
   updateBulletForShooterEnemies()
   updateShipButtonState()
   boss1:spawnInit()
@@ -1013,6 +1001,14 @@ function boss:move()
 end
 
 function boss:update()
+end
+
+function drawBoss()
+  boss1:draw()
+end
+
+function updateCameraPositionOfBossBattle (args)
+    mycam:followplayer(ship.x, ship.y-50)
 end
 
 

@@ -67,3 +67,11 @@ end
 
 function boss:update()
 end
+
+function drawBoss()
+  boss1:draw()
+end
+
+function updateCameraPositionOfBossBattle (args)
+    mycam:followplayer(ship.x, ship.y-50)
+end

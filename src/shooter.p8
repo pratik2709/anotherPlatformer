@@ -54,12 +54,6 @@ function update_shooter()
   updateShipButtonState()
 end
 
-function drawBoss()
-  if globals.level == 3 then
-    boss1:draw()
-  end
-end
-
 function drawExplosion()
   for explosion in all(explosions) do
     circ(explosion.x,explosion.y,explosion.t/2,8+explosion.t%3)
@@ -139,13 +133,7 @@ function transitionLevel()
 end
 
 function updateCameraPositionForShooter()
-  if globals.level == 3 then
-    mycam:followplayer(ship.x, ship.y-50)
-    -- boss1.x = ship.x
-    -- boss1.y = ship.y - 100
-  else
     mycam:followplayer(ship.x, ship.y)
-  end
 end
 
 function updateShipTransition()
