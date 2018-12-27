@@ -520,9 +520,8 @@ function draw_debug()
  --   print("YRE",ship.x,(ship.y-20),11)
  -- end
 
- if  not ship.isfaceright and  not boss1.isfaceright then
-   print("YRE",ship.x,(ship.y-20),11)
- end
+  print(boss1.lives,ship.x,(ship.y-20),11)
+
 
 end
 
@@ -743,14 +742,19 @@ function updateBulletForShooterEnemies()
     bullet.x += bullet.dx
     bullet.y += bullet.dy
     if bullet.y < (320-128) or bullet.y > 320 then
-      del(bullets,b)
+      del(bullets,bullet)
     end
     for enemy in all(enemies) do
       if shooter_collision(bullet, enemy) then
         del(enemies, enemy)
-        -- ship.p += 1
         explode(enemy.x, enemy.y)
+        --not sure, remove if causes problems
+        del(bullets,bullet)
       end
+    end
+    if shooter_collision(boss1, bullet) then
+        boss1.lives -= 1
+        del(bullets,bullet)
     end
   end
 end
@@ -963,6 +967,7 @@ function boss:new(x,y)
 	o.bad=true
   o.box={x1=0,y1=0,x2=7,y2=7}
 	o.spawn = false
+	o.lives = 5
 	return o
 end
 

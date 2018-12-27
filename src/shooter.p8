@@ -212,14 +212,19 @@ function updateBulletForShooterEnemies()
     bullet.x += bullet.dx
     bullet.y += bullet.dy
     if bullet.y < (320-128) or bullet.y > 320 then
-      del(bullets,b)
+      del(bullets,bullet)
     end
     for enemy in all(enemies) do
       if shooter_collision(bullet, enemy) then
         del(enemies, enemy)
-        -- ship.p += 1
         explode(enemy.x, enemy.y)
+        --not sure, remove if causes problems
+        del(bullets,bullet)
       end
+    end
+    if shooter_collision(boss1, bullet) then
+        boss1.lives -= 1
+        del(bullets,bullet)
     end
   end
 end

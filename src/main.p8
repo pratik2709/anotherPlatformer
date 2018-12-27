@@ -64,8 +64,7 @@ function draw_debug()
  --   print("YRE",ship.x,(ship.y-20),11)
  -- end
 
- if  not ship.isfaceright and  not boss1.isfaceright then
-   print("YRE",ship.x,(ship.y-20),11)
- end
+  print(boss1.lives,ship.x,(ship.y-20),11)
+
 
 end

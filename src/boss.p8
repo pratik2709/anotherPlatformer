@@ -20,6 +20,7 @@ function boss:new(x,y)
 	o.bad=true
   o.box={x1=0,y1=0,x2=7,y2=7}
 	o.spawn = false
+	o.lives = 5
 	return o
 end
 
