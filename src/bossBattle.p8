@@ -5,7 +5,7 @@ function battleDraw()
   drawShip()
   drawBullet()
   drawBoss()
-  drawExplosion()
+  drawExplosionForBoss()
 end
 
 function updateBossBattle()

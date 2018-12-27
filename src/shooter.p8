@@ -212,6 +212,7 @@ function updateBulletForShooterEnemies()
     end
     if shooter_collision(boss1, bullet) then
         boss1.lives -= 1
+        explode(boss1.x, boss1.y)
         del(bullets,bullet)
     end
   end

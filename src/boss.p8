@@ -72,6 +72,23 @@ function drawBoss()
   boss1:draw()
 end
 
-function updateCameraPositionOfBossBattle (args)
+function updateCameraPositionOfBossBattle()
     mycam:followplayer(ship.x, ship.y-50)
+end
+
+function boss:bossHurt()
+	sspr(self.sx + 8,
+       self.sy,
+       self.w,self.h,
+       self.x,
+       self.y,
+       self.w*2,self.h*2,
+       false)
+end
+
+function drawExplosionForBoss()
+  for explosion in all(explosions) do
+    circ(boss1.x,boss1.y,explosion.t/2,8+explosion.t%3)
+		boss1:bossHurt()
+  end
 end
