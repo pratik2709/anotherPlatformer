@@ -94,7 +94,7 @@ function drawExplosionForBoss()
 end
 
 function fireBossBullet(x,y)
-  local bullet = {
+  local boss_bullet = {
     sprite_number=6,
     x=x,
     y=y,
@@ -102,26 +102,26 @@ function fireBossBullet(x,y)
     dy=10,
     box={x1=2,y1=0,x2=5,y2=4}
   }
-  add(bossbullet,bullet)
+  add(bossbullets,boss_bullet)
 end
 
 function updateBulletForBoss()
-  for bullet in all(bossbullet) do
-    bullet.x += bullet.dx
-    bullet.y += bullet.dy
-    if bullet.y < (ship.y - 64) or bullet.y > (ship.y + 10) then
-      del(bossbullet,bullet)
-    end
+  for boss_bullet in all(bossbullets) do
+    -- bullet.x += bullet.dx
+    boss_bullet.y += 10
+    -- if bullet.y < (ship.y - 64) or bullet.y > (ship.y + 10) then
+    --   del(bossbullet,bullet)
+    -- end
 
-    if shooter_collision(ship, bullet) then
-        player_lives -= 1
-        del(bossbullet,bullet)
-    end
+    -- if shooter_collision(ship, bullet) then
+    --     player_lives -= 1
+    --     del(bossbullet,bullet)
+    -- end
   end
 end
 
 function drawBossBullet()
-  for bullet in all(bossbullet) do
-   spr(bullet.sprite_number,bullet.x,bullet.y)
+  for boss_bullet in all(bossbullets) do
+   spr(boss_bullet.sprite_number,boss_bullet.x,boss_bullet.y)
   end
 end

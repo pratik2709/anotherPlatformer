@@ -14,4 +14,4 @@ player_bullets={}
 cam = {}
 boss ={}
 bossHurtExplosions={}
-bossbullet = {}
+bossbullets = {}

@@ -19,5 +19,8 @@ function updateBossBattle()
   updateShipButtonState()
   boss1:spawnInit()
   boss1:move()
-  fireBossBullet(boss1.x,boss1.y)
+  if numberOfTicks%4==0 then
+    fireBossBullet(boss1.x+(boss1.w*5)/2,boss1.y+(boss1.h*5)/2)
+  end
+  updateBulletForBoss()
 end

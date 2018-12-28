@@ -63,8 +63,9 @@ function draw_debug()
  -- if ship.isfaceright and self.isfaceright then
  --   print("YRE",ship.x,(ship.y-20),11)
  -- end
-
-  print(boss1.lives,ship.x,(ship.y-20),11)
+ -- for bullet in all(bossbullet) do
+ --    print(bullet.y,ship.x,(ship.y-20),11)
+ -- end
 
 
 end
