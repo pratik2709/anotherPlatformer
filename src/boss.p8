@@ -108,15 +108,16 @@ end
 function updateBulletForBoss()
   for boss_bullet in all(bossbullets) do
     -- bullet.x += bullet.dx
-    boss_bullet.y += 10
+    boss_bullet.y += 4
     -- if bullet.y < (ship.y - 64) or bullet.y > (ship.y + 10) then
     --   del(bossbullet,bullet)
     -- end
 
-    -- if shooter_collision(ship, bullet) then
-    --     player_lives -= 1
-    --     del(bossbullet,bullet)
-    -- end
+    if shooter_collision(ship, boss_bullet) and not ship.imm then
+        player_lives -= 1
+        del(bossbullet,boss_bullet)
+				ship.imm = true
+    end
   end
 end
 

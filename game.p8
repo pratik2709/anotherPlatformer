@@ -522,7 +522,7 @@ function draw_debug()
  --   print("YRE",ship.x,(ship.y-20),11)
  -- end
  -- for bullet in all(bossbullet) do
- --    print(bullet.y,ship.x,(ship.y-20),11)
+    print(ship.imm,ship.x,(ship.y-20),11)
  -- end
 
 
@@ -600,12 +600,12 @@ function drawStars()
 end
 
 function drawShip()
-  if not ship.imm or t%8 < 4 then
+  if not ship.imm then
    spr(ship.sprite_number,ship.x,ship.y)
   end
 end
 
-function drawEnemy (args)
+function drawEnemy()
   for enemy in all(enemies) do
     spr(enemy.sprite_number, enemy.x, enemy.y)
   end
@@ -704,7 +704,7 @@ end
 function updateShipInvulnerability ()
   if ship.imm then
     ship.t += 1
-    if ship.t > 30 then
+    if ship.t > 60 then
       ship.imm = false
       ship.t = 0
     end
@@ -811,7 +811,8 @@ function updateBossBattle()
   boss1:spawnInit()
   boss1:move()
   if numberOfTicks%4==0 then
-    fireBossBullet(boss1.x+(boss1.w*5)/2,boss1.y+(boss1.h*5)/2)
+    fireBossBullet(boss1.x+((boss1.w*5)/2) - 2*5,boss1.y+(boss1.h*5)/2)
+    fireBossBullet(boss1.x+((boss1.w*5)/2) + 2*5,boss1.y+(boss1.h*5)/2)
   end
   updateBulletForBoss()
 end
@@ -1052,15 +1053,16 @@ end
 function updateBulletForBoss()
   for boss_bullet in all(bossbullets) do
     -- bullet.x += bullet.dx
-    boss_bullet.y += 10
+    boss_bullet.y += 4
     -- if bullet.y < (ship.y - 64) or bullet.y > (ship.y + 10) then
     --   del(bossbullet,bullet)
     -- end
 
-    -- if shooter_collision(ship, bullet) then
-    --     player_lives -= 1
-    --     del(bossbullet,bullet)
-    -- end
+    if shooter_collision(ship, boss_bullet) and not ship.imm then
+        player_lives -= 1
+        del(bossbullet,boss_bullet)
+				ship.imm = true
+    end
   end
 end
 

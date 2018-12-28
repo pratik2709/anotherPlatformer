@@ -64,7 +64,7 @@ function draw_debug()
  --   print("YRE",ship.x,(ship.y-20),11)
  -- end
  -- for bullet in all(bossbullet) do
- --    print(bullet.y,ship.x,(ship.y-20),11)
+    print(ship.imm,ship.x,(ship.y-20),11)
  -- end
 
 

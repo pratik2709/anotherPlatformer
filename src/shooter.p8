@@ -67,12 +67,12 @@ function drawStars()
 end
 
 function drawShip()
-  if not ship.imm or t%8 < 4 then
+  if not ship.imm then
    spr(ship.sprite_number,ship.x,ship.y)
   end
 end
 
-function drawEnemy (args)
+function drawEnemy()
   for enemy in all(enemies) do
     spr(enemy.sprite_number, enemy.x, enemy.y)
   end
@@ -171,7 +171,7 @@ end
 function updateShipInvulnerability ()
   if ship.imm then
     ship.t += 1
-    if ship.t > 30 then
+    if ship.t > 60 then
       ship.imm = false
       ship.t = 0
     end
