@@ -146,11 +146,11 @@ function explode(x,y)
   add(explosions,{x=x,y=y,t=0})
 end
 
-function fire()
+function fire(x,y)
   local bullet = {
     sprite_number=6,
-    x=ship.x,
-    y=ship.y,
+    x=x,
+    y=y,
     dx=0,
     dy=-3,
     box={x1=2,y1=0,x2=5,y2=4}
@@ -237,7 +237,7 @@ function updateShipButtonState()
    then
      ship.y+=1
    end
-  if btnp(5) then fire() end
+  if btnp(5) then fire(ship.x,ship.y) end
 end
 
 function updateRespawnEnemyStatus ()

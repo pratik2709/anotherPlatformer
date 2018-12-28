@@ -6,6 +6,7 @@ function battleDraw()
   drawBullet()
   drawBoss()
   drawExplosionForBoss()
+  drawBossBullet()
 end
 
 function updateBossBattle()
@@ -18,4 +19,5 @@ function updateBossBattle()
   updateShipButtonState()
   boss1:spawnInit()
   boss1:move()
+  fireBossBullet(boss1.x,boss1.y)
 end

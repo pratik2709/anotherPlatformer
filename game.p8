@@ -14,6 +14,7 @@ player_bullets={}
 cam = {}
 boss ={}
 bossHurtExplosions={}
+bossbullet = {}
 
 
  -- **************player.p8****************
@@ -677,11 +678,11 @@ function explode(x,y)
   add(explosions,{x=x,y=y,t=0})
 end
 
-function fire()
+function fire(x,y)
   local bullet = {
     sprite_number=6,
-    x=ship.x,
-    y=ship.y,
+    x=x,
+    y=y,
     dx=0,
     dy=-3,
     box={x1=2,y1=0,x2=5,y2=4}
@@ -768,7 +769,7 @@ function updateShipButtonState()
    then
      ship.y+=1
    end
-  if btnp(5) then fire() end
+  if btnp(5) then fire(ship.x,ship.y) end
 end
 
 function updateRespawnEnemyStatus ()
@@ -795,6 +796,7 @@ function battleDraw()
   drawBullet()
   drawBoss()
   drawExplosionForBoss()
+  drawBossBullet()
 end
 
 function updateBossBattle()
@@ -807,6 +809,7 @@ function updateBossBattle()
   updateShipButtonState()
   boss1:spawnInit()
   boss1:move()
+  fireBossBullet(boss1.x,boss1.y)
 end
 
 
@@ -955,9 +958,9 @@ function boss:new(x,y)
 	o.isfaceright=true
 	o.bounce=true --do we turn around at a wall?
 	o.bad=true
-  o.box={x1=0,y1=0,x2=7,y2=7}
+  o.box={x1=0,y1=0,x2=7*5,y2=7*5}
 	o.spawn = false
-	o.lives = 5
+	o.lives = 10
 	return o
 end
 
@@ -967,7 +970,7 @@ function boss:draw()
        self.w,self.h,
        self.x,
        self.y,
-       self.w*2,self.h*2,
+       self.w*5,self.h*5,
        false)
 end
 
@@ -1019,7 +1022,7 @@ function boss:bossHurt()
        self.w,self.h,
        self.x,
        self.y,
-       self.w*2,self.h*2,
+       self.w*5,self.h*5,
        false)
 end
 
@@ -1027,6 +1030,39 @@ function drawExplosionForBoss()
   for explosion in all(explosions) do
     circ(boss1.x,boss1.y,explosion.t/2,8+explosion.t%3)
 		boss1:bossHurt()
+  end
+end
+
+function fireBossBullet(x,y)
+  local bullet = {
+    sprite_number=6,
+    x=x,
+    y=y,
+    dx=0,
+    dy=10,
+    box={x1=2,y1=0,x2=5,y2=4}
+  }
+  add(bossbullet,bullet)
+end
+
+function updateBulletForBoss()
+  for bullet in all(bossbullet) do
+    bullet.x += bullet.dx
+    bullet.y += bullet.dy
+    if bullet.y < (ship.y - 64) or bullet.y > (ship.y + 10) then
+      del(bossbullet,bullet)
+    end
+
+    if shooter_collision(ship, bullet) then
+        player_lives -= 1
+        del(bossbullet,bullet)
+    end
+  end
+end
+
+function drawBossBullet()
+  for bullet in all(bossbullet) do
+   spr(bullet.sprite_number,bullet.x,bullet.y)
   end
 end
 
