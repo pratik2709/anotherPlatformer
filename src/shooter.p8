@@ -7,6 +7,7 @@ function initialize_shooter()
     p=0,
     t=0,
     imm=false,
+    flash=false,
     isfaceright=true,
     box = {x1=0,y1=0,x2=7,y2=7}
   }
@@ -67,8 +68,18 @@ function drawStars()
 end
 
 function drawShip()
-  if not ship.imm then
+  if not ship.flash then
    spr(ship.sprite_number,ship.x,ship.y)
+  end
+
+  if ship.imm == true then
+    if ship.flash==true then
+      ship.flash = false
+    else
+      ship.flash=true
+    end
+  else
+    ship.flash=false
   end
 end
 
