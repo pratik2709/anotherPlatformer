@@ -121,7 +121,6 @@ end
 function respawn()
   local number_of_enemies = flr(rnd(9)) + 2
   for i=1,number_of_enemies do
-    globals.enemies += 1
     local d = -1
     local e = {
      sprite_number=5,
@@ -138,7 +137,7 @@ function respawn()
 end
 
 function transitionLevel()
-  if globals.enemies > 50 then
+  if globals.enemyKills > 5 then
     globals.level=3
   end
 end
@@ -215,9 +214,9 @@ function updateBulletForShooterEnemies()
     end
     for enemy in all(enemies) do
       if shooter_collision(bullet, enemy) then
+        globals.enemyKills += 1
         del(enemies, enemy)
         explode(enemy.x, enemy.y)
-        --not sure, remove if causes problems
         del(bullets,bullet)
       end
     end

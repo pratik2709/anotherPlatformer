@@ -4,8 +4,8 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level=3,
- enemies=0,
+ level=2,
+ enemyKills=0,
 }
 player = {}
 baddie={}
@@ -654,7 +654,6 @@ end
 function respawn()
   local number_of_enemies = flr(rnd(9)) + 2
   for i=1,number_of_enemies do
-    globals.enemies += 1
     local d = -1
     local e = {
      sprite_number=5,
@@ -671,7 +670,7 @@ function respawn()
 end
 
 function transitionLevel()
-  if globals.enemies > 50 then
+  if globals.enemyKills > 5 then
     globals.level=3
   end
 end
@@ -748,9 +747,9 @@ function updateBulletForShooterEnemies()
     end
     for enemy in all(enemies) do
       if shooter_collision(bullet, enemy) then
+        globals.enemyKills += 1
         del(enemies, enemy)
         explode(enemy.x, enemy.y)
-        --not sure, remove if causes problems
         del(bullets,bullet)
       end
     end
@@ -1070,9 +1069,9 @@ function updateBulletForBoss()
     -- end
 
     if shooter_collision(ship, boss_bullet) and not ship.imm then
-        -- player_lives -= 1
+        player_lives -= 1
         del(bossbullet,boss_bullet)
-				-- ship.imm = true
+				ship.imm = true
     end
   end
 end
