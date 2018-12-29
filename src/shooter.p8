@@ -144,7 +144,7 @@ function transitionLevel()
 end
 
 function updateCameraPositionForShooter()
-    mycam:followplayer(ship.x, ship.y)
+    mycam:followplayer(ship.x, ship.y-50)
 end
 
 function updateShipTransition()
@@ -223,7 +223,7 @@ function updateBulletForShooterEnemies()
     end
     if shooter_collision(boss1, bullet) then
         boss1.lives -= 1
-        explode(boss1.x, boss1.y)
+        explode(bullet.x, bullet.y)
         del(bullets,bullet)
     end
   end

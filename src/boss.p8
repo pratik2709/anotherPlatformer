@@ -88,7 +88,7 @@ end
 
 function drawExplosionForBoss()
   for explosion in all(explosions) do
-    circ(boss1.x,boss1.y,explosion.t/2,8+explosion.t%3)
+    circ(explosion.x,explosion.y,explosion.t/2,8+explosion.t%3)
 		boss1:bossHurt()
   end
 end

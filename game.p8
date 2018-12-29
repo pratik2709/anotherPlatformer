@@ -540,6 +540,7 @@ function initialize_shooter()
     p=0,
     t=0,
     imm=false,
+    flash=false,
     isfaceright=true,
     box = {x1=0,y1=0,x2=7,y2=7}
   }
@@ -600,8 +601,18 @@ function drawStars()
 end
 
 function drawShip()
-  if not ship.imm then
+  if not ship.flash then
    spr(ship.sprite_number,ship.x,ship.y)
+  end
+
+  if ship.imm == true then
+    if ship.flash==true then
+      ship.flash = false
+    else
+      ship.flash=true
+    end
+  else
+    ship.flash=false
   end
 end
 
@@ -666,7 +677,7 @@ function transitionLevel()
 end
 
 function updateCameraPositionForShooter()
-    mycam:followplayer(ship.x, ship.y)
+    mycam:followplayer(ship.x, ship.y-50)
 end
 
 function updateShipTransition()
@@ -745,7 +756,7 @@ function updateBulletForShooterEnemies()
     end
     if shooter_collision(boss1, bullet) then
         boss1.lives -= 1
-        explode(boss1.x, boss1.y)
+        explode(bullet.x, bullet.y)
         del(bullets,bullet)
     end
   end
@@ -1033,7 +1044,7 @@ end
 
 function drawExplosionForBoss()
   for explosion in all(explosions) do
-    circ(boss1.x,boss1.y,explosion.t/2,8+explosion.t%3)
+    circ(explosion.x,explosion.y,explosion.t/2,8+explosion.t%3)
 		boss1:bossHurt()
   end
 end
@@ -1059,9 +1070,9 @@ function updateBulletForBoss()
     -- end
 
     if shooter_collision(ship, boss_bullet) and not ship.imm then
-        player_lives -= 1
+        -- player_lives -= 1
         del(bossbullet,boss_bullet)
-				ship.imm = true
+				-- ship.imm = true
     end
   end
 end
@@ -1142,13 +1153,14 @@ end
  -- **************gfx.p8****************
 
 
+
 __gfx__
 000000000cccccc000000000999999990000000000000000000000000aaaaaa00000000000000000000000000000000000000000000000000000000000000000
-00000000cdddddd1000000009bbbbbb900c00c000000000000000000c9999991088888800bbbbbb0000000000000000000000000000000000000000000000000
-0aaaaa00cdddddd1000000009bbbbbb900c00c0000bbbb0000000000cdddddd1083883800b8bb8b0000000000000000000000000000000000000000000000000
-0a1a1a00cdddddd1000000009bb88bb9cccccccc00b8cb0000090000cdddddd1088888800bbbbbb0000000000000000000000000000000000000000000000000
-0aaaaa00cdddddd1000000009bb88bb9c999999c00bc8b0000000000cdddddd1088888800bbbbbb0000000000000000000000000000000000000000000000000
-0aaaaa00cdddddd1000000009bbbbbb9cccccccc00bbbb0000000000cdddddd1080000800b0000b0000000000000000000000000000000000000000000000000
+00000000cdddddd1000000009bbbbbb900c00c000000000000000000c99999910bbbbbb008888880000000000000000000000000000000000000000000000000
+0aaaaa00cdddddd1000000009bbbbbb900c00c0000bbbb0000000000cdddddd10b8bb8b008a88a80000000000000000000000000000000000000000000000000
+0a1a1a00cdddddd1000000009bb88bb9cccccccc00b8cb0000090000cdddddd10bbbbbb008888880000000000000000000000000000000000000000000000000
+0aaaaa00cdddddd1000000009bb88bb9c999999c00bc8b0000000000cdddddd10bbbbbb008888880000000000000000000000000000000000000000000000000
+0aaaaa00cdddddd1000000009bbbbbb9cccccccc00bbbb0000000000cdddddd10b0000b008000080000000000000000000000000000000000000000000000000
 00000000cdddddd1000000009bbbbbb90c0cc0c00000000000000000cdddddd10000000000000000000000000000000000000000000000000000000000000000
 00000000011111100000000099999999000000000000000000000000011111100000000000000000000000000000000000000000000000000000000000000000
 000009900000c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
