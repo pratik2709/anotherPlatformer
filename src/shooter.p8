@@ -44,15 +44,16 @@ end
 
 function update_shooter()
   update_stars()
-  updateShipInvulnerability()
-  updateShooterExplosions()
-  updateShipTransition()
   updateCameraPositionForShooter()
-  updateRespawnEnemyStatus()
-  transitionLevel()
-  updateShooterEnemies()
-  updateBulletForShooterEnemies()
-  updateShipButtonState()
+  if updateShipTransition() then
+    updateShipInvulnerability()
+    updateShooterExplosions()
+    updateRespawnEnemyStatus()
+    transitionLevel()
+    updateShooterEnemies()
+    updateBulletForShooterEnemies()
+    updateShipButtonState()
+  end
 end
 
 function drawExplosion()
@@ -149,7 +150,10 @@ end
 function updateShipTransition()
   if ship.y > (40*8 - 40) then
      ship.y -= transitionspeed
-   end
+     return false
+   else
+     return true
+  end
 end
 
 function explode(x,y)

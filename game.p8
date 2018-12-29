@@ -522,7 +522,7 @@ function draw_debug()
  --   print("YRE",ship.x,(ship.y-20),11)
  -- end
  -- for bullet in all(bossbullet) do
-    print(ship.imm,ship.x,(ship.y-20),11)
+    -- print(ship.imm,ship.x,(ship.y-20),11)
  -- end
 
 
@@ -577,15 +577,16 @@ end
 
 function update_shooter()
   update_stars()
-  updateShipInvulnerability()
-  updateShooterExplosions()
-  updateShipTransition()
   updateCameraPositionForShooter()
-  updateRespawnEnemyStatus()
-  transitionLevel()
-  updateShooterEnemies()
-  updateBulletForShooterEnemies()
-  updateShipButtonState()
+  if updateShipTransition() then
+    updateShipInvulnerability()
+    updateShooterExplosions()
+    updateRespawnEnemyStatus()
+    transitionLevel()
+    updateShooterEnemies()
+    updateBulletForShooterEnemies()
+    updateShipButtonState()
+  end
 end
 
 function drawExplosion()
@@ -682,7 +683,10 @@ end
 function updateShipTransition()
   if ship.y > (40*8 - 40) then
      ship.y -= transitionspeed
-   end
+     return false
+   else
+     return true
+  end
 end
 
 function explode(x,y)
@@ -814,7 +818,7 @@ function updateBossBattle()
   update_stars()
   updateShipInvulnerability()
   updateShooterExplosions()
-  updateShipTransition()
+  -- updateShipTransition()
   updateCameraPositionOfBossBattle()
   updateBulletForShooterEnemies()
   updateShipButtonState()
