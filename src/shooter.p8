@@ -34,6 +34,7 @@ function initialize_stars()
   end
 end
 
+
 function draw_shooter()
   drawStars()
   drawShip()
@@ -91,9 +92,7 @@ function drawEnemy()
 end
 
 function drawBullet()
-  for bullet in all(bullets) do
-   spr(bullet.sprite_number,bullet.x,bullet.y)
-  end
+  shooterShipBulletPool.animate()
 end
 
 function update_stars()
@@ -161,15 +160,7 @@ function explode(x,y)
 end
 
 function fire(x,y)
-  local bullet = {
-    sprite_number=6,
-    x=x,
-    y=y,
-    dx=0,
-    dy=-3,
-    box={x1=2,y1=0,x2=5,y2=4}
-  }
-  add(bullets,bullet)
+  shooterShipBulletPool.getOne(x,y)
 end
 
 function updateShooterExplosions()

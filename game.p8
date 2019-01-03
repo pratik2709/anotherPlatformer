@@ -4,7 +4,7 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level=2,
+ level=1,
  enemyKills=0,
 }
 player = {}
@@ -30,7 +30,7 @@ end
 function initial_splash_screen()
   splashscreentimer += 1
   if splashscreentimer < 100 then
-    print("Starting soon \n Get Ready!",
+    print("Starting soon \n Get Ready! \n Use z for jump  \n and \n x for firing!",
        player1:getx() + 20, player1.y,4)
    end
 end
@@ -818,7 +818,6 @@ function updateBossBattle()
   update_stars()
   updateShipInvulnerability()
   updateShooterExplosions()
-  -- updateShipTransition()
   updateCameraPositionOfBossBattle()
   updateBulletForShooterEnemies()
   updateShipButtonState()
