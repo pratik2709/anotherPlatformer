@@ -10,8 +10,7 @@ function _init()
   player1 = player:new(10,0)
   initialize_shooter()
   boss1 = boss:new(0, 0)
-  shooterShipBulletPool = new Pool(30);
-  shooterShipBulletPool.init("bullet");
+
 end
 
 

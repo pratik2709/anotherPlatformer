@@ -4,7 +4,7 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level=1,
+ level=2,
  enemyKills=0,
 }
 player = {}
@@ -15,3 +15,6 @@ cam = {}
 boss ={}
 bossHurtExplosions={}
 bossbullets = {}
+
+bullet={}
+pool={}
