@@ -479,14 +479,16 @@ function pool:init(object)
 end
 
 function pool:getOne(x,y)
-  if not self.bulletPool[self.maxSize-1].in_use then
-    self.bulletPool[self.maxSize-1]:spawn(x,y)
-    table.insert(self.bulletPool,1,table.remove(self.bulletPool))
+  if not self.bulletPool[self.maxSize].in_use then
+    self.bulletPool[self.maxSize]:spawn(x,y)
+
+    table.insert(self.bulletPool,1,self.bulletPool[self.maxSize])
+    table.remove(self.bulletPool)
   end
 end
 
 function pool:getTwo(x1,y1,x2,y2)
-  if not self.bulletPool[self.maxSize-1].in_use and not self.bulletPool[self.maxSize-2].in_use then
+  if not self.bulletPool[self.maxSize].in_use and not self.bulletPool[self.maxSize-1].in_use then
     self:getOne(x1,y1)
     self:getOne(x2,y2)
   end
@@ -506,7 +508,7 @@ end
 function pool:animate()
   for i=1,self.maxSize,1
   do
-    if self.bulletPool[i] ~= nil and self.bulletPool[i].in_use then
+    if self.bulletPool[i].in_use then
       spr(self.bulletPool[i].sprite_number, self.bulletPool[i].x, self.bulletPool[i].y)
     end
   end
@@ -531,9 +533,16 @@ function bullet:spawn(x,y)
 end
 
 function bullet:clear()
-  self.x = 0;
-  self.y = 0;
-  self.in_use = false;
+  self.x = 0
+  self.y = 0
+  self.in_use = false
+end
+
+function clearAndUse (i)
+  shooterShipBulletPool.bulletPool[i]:clear()
+  local temp = shooterShipBulletPool.bulletPool[i]
+  shooterShipBulletPool.remove(shooterShipBulletPool.bulletPool, i)
+  table.insert(shooterShipBulletPool.bulletPool, temp)
 end
 
 function updateBulletForShooterEnemies()
@@ -544,23 +553,20 @@ function updateBulletForShooterEnemies()
       shooterShipBulletPool.bulletPool[i].x += shooterShipBulletPool.bulletPool[i].dx
       shooterShipBulletPool.bulletPool[i].y += shooterShipBulletPool.bulletPool[i].dy
       if shooterShipBulletPool.bulletPool[i].y < (320-128) or shooterShipBulletPool.bulletPool[i].y > 320 then
-        shooterShipBulletPool.bulletPool[i].clear()
-        table.insert(shooterShipBulletPool.bulletPool, shooterShipBulletPool.remove(shooterShipBulletPool.bulletPool, i))
+          clearAndUse(i)
       end
       for enemy in all(enemies) do
         if shooter_collision(shooterShipBulletPool.bulletPool[i], enemy) then
           globals.enemyKills += 1
           del(enemies, enemy)
           explode(enemy.x, enemy.y)
-          shooterShipBulletPool.bulletPool[i].clear()
-          table.insert(shooterShipBulletPool.bulletPool, table.remove(shooterShipBulletPool.bulletPool, i))
+          clearAndUse(i)
         end
       end
       if shooter_collision(boss1, shooterShipBulletPool.bulletPool[i]) then
           boss1.lives -= 1
           explode(shooterShipBulletPool.bulletPool[i].x, shooterShipBulletPool.bulletPool[i].y)
-          shooterShipBulletPool.bulletPool[i].clear()
-          table.insert(shooterShipBulletPool.bulletPool, table.remove(shooterShipBulletPool.bulletPool, i))
+          clearAndUse(i)
       end
     end
   end
@@ -671,7 +677,7 @@ function initialize_shooter()
   initialize_stars()
   transitionspeed = 3
   shooterShipBulletPool = pool:new(30)
-  shooterShipBulletPool.init("bullet")
+  shooterShipBulletPool:init("bullet")
 end
 
 function initialize_stars()
@@ -1060,6 +1066,134 @@ function checkwallcollisionenemy(actor)
   actor.dx*=.98
 
 end
+
+
+ -- **************missing.p8****************
+
+-- pico8-missing-builtins v0.2.0
+-- https://github.com/adamscott/pico8-missing-builtins
+--__lua__
+__setmetatable = setmetatable
+__metatables = {}
+function setmetatable (object, mt)
+  __metatables[object] = mt
+  return __setmetatable(object, mt)
+end
+-- getmetatable depends on this setmetatable implementation
+function getmetatable (object)
+  return __metatables[object]
+end
+
+-- rawget depends on getmetatable
+function rawget (tbl, index)
+  assert(type(tbl) == 'table', "bad argument #1 to 'rawget' "
+    .."(table expected, got "..type(tbl)..")")
+  local ti = tbl.__index
+  local mt = getmetatable(tbl)
+  local value = nil
+  tbl.__index = tbl
+  __setmetatable(tbl, nil)
+  value = tbl[index]
+  tbl.__index = ti
+  __setmetatable(tbl, mt)
+  return value
+end
+
+function unpack (arr, i, j)
+  local n = {}
+  local k = 0
+  local initial_i = i
+  j = j or #arr
+  for i = i or 1, j do
+    k = k + 1
+    n[k] = arr[i]
+  end
+  local l = k
+  local function create_arg(l, ...)
+    if l == 0 then
+      return ...
+    else
+      return create_arg(l - 1, n[l], ...)
+    end
+  end
+  return create_arg(l)
+end
+
+function ipairs (a)
+  local function iter(a, i)
+    i = i + 1
+    local v = a[i]
+    if v then
+      return i, v
+    end
+  end
+  return iter, a, 0
+end
+
+table = {}
+table.pack = function (...) return {...} end
+table.unpack = unpack
+
+function table.insert (list, pos, value)
+  assert(type(list) == 'table', "bad argument #1 to 'insert' "
+    .."(table expected, got "..type(list)..")")
+  if pos and not value then
+    value = pos
+    pos = #list + 1
+  else
+    assert(type(pos) == 'number', "bad argument #2 to 'insert' "
+      .."(number expected, got "..type(pos)..")")
+  end
+  if pos <= #list then
+    for i = #list, pos, -1 do
+      list[i + 1] = list[i]
+    end
+  end
+  list[pos] = value
+end
+
+function table.remove(list, pos)
+  assert(type(list) == 'table', "bad argument #1 to 'remove' "
+    .."(table expected, got "..type(list)..")")
+  if not pos then
+    pos = #list
+  else
+    assert(type(pos) == 'number', "bad argument #2 to 'remove' "
+      .."(number expected, got "..type(tbl)..")")
+  end
+  for i = pos, #list do
+    list[i] = list[i + 1]
+  end
+end
+
+function table.sort (arr, comp)
+  if not comp then
+    comp = function (a, b)
+      return a < b
+    end
+  end
+  local function partition (a, lo, hi)
+      pivot = a[hi]
+      i = lo - 1
+      for j = lo, hi - 1 do
+        if comp(a[j], pivot) then
+          i = i + 1
+          a[i], a[j] = a[j], a[i]
+        end
+      end
+      a[i + 1], a[hi] = a[hi], a[i + 1]
+      return i + 1
+    end
+  local function quicksort (a, lo, hi)
+    if lo < hi then
+      p = partition(a, lo, hi)
+      quicksort(a, lo, p - 1)
+      return quicksort(a, p + 1, hi)
+    end
+  end
+  return quicksort(arr, 1, #arr)
+end
+-- END pico8-missing-builtins v0.1.3
 
 
  -- **************boss.p8****************

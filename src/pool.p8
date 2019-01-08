@@ -18,14 +18,16 @@ function pool:init(object)
 end
 
 function pool:getOne(x,y)
-  if not self.bulletPool[self.maxSize-1].in_use then
-    self.bulletPool[self.maxSize-1]:spawn(x,y)
-    table.insert(self.bulletPool,1,table.remove(self.bulletPool))
+  if not self.bulletPool[self.maxSize].in_use then
+    self.bulletPool[self.maxSize]:spawn(x,y)
+
+    table.insert(self.bulletPool,1,self.bulletPool[self.maxSize])
+    table.remove(self.bulletPool)
   end
 end
 
 function pool:getTwo(x1,y1,x2,y2)
-  if not self.bulletPool[self.maxSize-1].in_use and not self.bulletPool[self.maxSize-2].in_use then
+  if not self.bulletPool[self.maxSize].in_use and not self.bulletPool[self.maxSize-1].in_use then
     self:getOne(x1,y1)
     self:getOne(x2,y2)
   end
@@ -45,7 +47,7 @@ end
 function pool:animate()
   for i=1,self.maxSize,1
   do
-    if self.bulletPool[i] ~= nil and self.bulletPool[i].in_use then
+    if self.bulletPool[i].in_use then
       spr(self.bulletPool[i].sprite_number, self.bulletPool[i].x, self.bulletPool[i].y)
     end
   end
@@ -70,9 +72,16 @@ function bullet:spawn(x,y)
 end
 
 function bullet:clear()
-  self.x = 0;
-  self.y = 0;
-  self.in_use = false;
+  self.x = 0
+  self.y = 0
+  self.in_use = false
+end
+
+function clearAndUse (i)
+  shooterShipBulletPool.bulletPool[i]:clear()
+  local temp = shooterShipBulletPool.bulletPool[i]
+  shooterShipBulletPool.remove(shooterShipBulletPool.bulletPool, i)
+  table.insert(shooterShipBulletPool.bulletPool, temp)
 end
 
 function updateBulletForShooterEnemies()
@@ -83,23 +92,20 @@ function updateBulletForShooterEnemies()
       shooterShipBulletPool.bulletPool[i].x += shooterShipBulletPool.bulletPool[i].dx
       shooterShipBulletPool.bulletPool[i].y += shooterShipBulletPool.bulletPool[i].dy
       if shooterShipBulletPool.bulletPool[i].y < (320-128) or shooterShipBulletPool.bulletPool[i].y > 320 then
-        shooterShipBulletPool.bulletPool[i].clear()
-        table.insert(shooterShipBulletPool.bulletPool, shooterShipBulletPool.remove(shooterShipBulletPool.bulletPool, i))
+          clearAndUse(i)
       end
       for enemy in all(enemies) do
         if shooter_collision(shooterShipBulletPool.bulletPool[i], enemy) then
           globals.enemyKills += 1
           del(enemies, enemy)
           explode(enemy.x, enemy.y)
-          shooterShipBulletPool.bulletPool[i].clear()
-          table.insert(shooterShipBulletPool.bulletPool, table.remove(shooterShipBulletPool.bulletPool, i))
+          clearAndUse(i)
         end
       end
       if shooter_collision(boss1, shooterShipBulletPool.bulletPool[i]) then
           boss1.lives -= 1
           explode(shooterShipBulletPool.bulletPool[i].x, shooterShipBulletPool.bulletPool[i].y)
-          shooterShipBulletPool.bulletPool[i].clear()
-          table.insert(shooterShipBulletPool.bulletPool, table.remove(shooterShipBulletPool.bulletPool, i))
+          clearAndUse(i)
       end
     end
   end

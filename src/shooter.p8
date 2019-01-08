@@ -23,7 +23,7 @@ function initialize_shooter()
   initialize_stars()
   transitionspeed = 3
   shooterShipBulletPool = pool:new(30)
-  shooterShipBulletPool.init("bullet")
+  shooterShipBulletPool:init("bullet")
 end
 
 function initialize_stars()
