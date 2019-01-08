@@ -93,9 +93,9 @@ function drawEnemy()
   end
 end
 
--- function drawBullet()
---   shooterShipBulletPool:animate()
--- end
+function drawBullet()
+  shooterShipBulletPool:animate()
+end
 
 function update_stars()
   for st in all(stars) do

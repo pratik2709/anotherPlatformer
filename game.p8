@@ -541,7 +541,9 @@ end
 function clearAndUse (i)
   shooterShipBulletPool.bulletPool[i]:clear()
   local temp = shooterShipBulletPool.bulletPool[i]
-  shooterShipBulletPool.remove(shooterShipBulletPool.bulletPool, i)
+  table.remove(shooterShipBulletPool.bulletPool, i)
+  printh("clear")
+  printh(temp.x)
   table.insert(shooterShipBulletPool.bulletPool, temp)
 end
 
@@ -549,28 +551,30 @@ function updateBulletForShooterEnemies()
 
   for i=shooterShipBulletPool.maxSize,1,-1
   do
-    if shooterShipBulletPool.bulletPool[i] ~= nil and shooterShipBulletPool.bulletPool[i].in_use then
+    if shooterShipBulletPool.bulletPool[i].in_use then
       shooterShipBulletPool.bulletPool[i].x += shooterShipBulletPool.bulletPool[i].dx
       shooterShipBulletPool.bulletPool[i].y += shooterShipBulletPool.bulletPool[i].dy
       if shooterShipBulletPool.bulletPool[i].y < (320-128) or shooterShipBulletPool.bulletPool[i].y > 320 then
           clearAndUse(i)
-      end
-      for enemy in all(enemies) do
-        if shooter_collision(shooterShipBulletPool.bulletPool[i], enemy) then
-          globals.enemyKills += 1
-          del(enemies, enemy)
-          explode(enemy.x, enemy.y)
-          clearAndUse(i)
-        end
-      end
-      if shooter_collision(boss1, shooterShipBulletPool.bulletPool[i]) then
+      elseif shooter_collision(boss1, shooterShipBulletPool.bulletPool[i]) then
           boss1.lives -= 1
           explode(shooterShipBulletPool.bulletPool[i].x, shooterShipBulletPool.bulletPool[i].y)
           clearAndUse(i)
+      else
+        for enemy in all(enemies) do
+          printh("ubs")
+          printh(shooterShipBulletPool.bulletPool[i].x)
+          if shooter_collision(shooterShipBulletPool.bulletPool[i], enemy) then
+            globals.enemyKills += 1
+            del(enemies, enemy)
+            explode(enemy.x, enemy.y)
+            clearAndUse(i)
+            break
+          end
+        end
       end
     end
   end
-
 end
 
 
@@ -747,9 +751,9 @@ function drawEnemy()
   end
 end
 
--- function drawBullet()
---   shooterShipBulletPool:animate()
--- end
+function drawBullet()
+  shooterShipBulletPool:animate()
+end
 
 function update_stars()
   for st in all(stars) do
