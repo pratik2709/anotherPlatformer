@@ -4,6 +4,9 @@ map: draw maps
 
 https://tutorialedge.net/gamedev/aabb-collision-detection-tutorial/
 
+https://weeklycoder.com/2015/07/22/the-incredibly-useful-sine-waves-part-1-trigonometry-game-dev-primer/
+https://gamedevelopment.tutsplus.com/tutorials/quick-tip-create-smooth-enemy-movement-with-sinusoidal-motion--gamedev-6009
+
 class player {
   public int x = 5;
   public int y = 5;

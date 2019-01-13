@@ -9,7 +9,7 @@ end
 function initial_splash_screen()
   splashscreentimer += 1
   if splashscreentimer < 100 then
-    print("Starting soon \n Get Ready!",
+    print("Starting soon \n Get Ready! \n Use z for jump  \n and \n x for firing!",
        player1:getx() + 20, player1.y,4)
    end
 end
@@ -383,13 +383,13 @@ function player:update()
  for player_bullet in all(player_bullets) do
    player_bullet.x += player_bullet.dx
    player_bullet.y += player_bullet.dy
-   if collide(player_bullet, sgn(player_bullet.dx),0) then
-     del(player_bullets,player_bullets)
-   end
+   -- if collide(player_bullet, sgn(player_bullet.dx),0) then
+   --   del(player_bullets,player_bullet)
+   -- end
    for baddie in all(baddies) do
      if shooter_collision(baddie, player_bullet) then
        del(baddies, baddie)
-       -- explode(enemy.x, enemy.y)
+       del(player_bullets,player_bullet)
      end
    end
  end

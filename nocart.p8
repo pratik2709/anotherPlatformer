@@ -5,7 +5,7 @@ globals = {
  gravity = 0.2,
  dt = 0.5,
  level=1,
- enemyKills=0,
+ enemykills=0,
 }
 player = {}
 baddie={}
@@ -13,29 +13,93 @@ baddies = {}
 player_bullets={}
 cam = {}
 boss ={}
-bossHurtExplosions={}
+bosshurtexplosions={}
 bossbullets = {}
-
 bullet={}
 pool={}
+  ship = {
+    sprite_number=4,
+    x=35*8,
+    y=62*8,
+    p=0,
+    t=0,
+    imm=false,
+    flash=false,
+    isfaceright=true,
+    box = {x1=0,y1=0,x2=7,y2=7}
+  }
+table = {}
+table.pack = function (...) return {...} end
+table.unpack = unpack
 
+function table.insert (list, pos, value)
+  assert(type(list) == 'table', "bad argument #1 to 'insert' "
+    .."(table expected, got "..type(list)..")")
+  if pos and not value then
+    value = pos
+    pos = #list + 1
+  else
+    assert(type(pos) == 'number', "bad argument #2 to 'insert' "
+      .."(number expected, got "..type(pos)..")")
+  end
+  if pos <= #list then
+    for i = #list, pos, -1 do
+      list[i + 1] = list[i]
+    end
+  end
+  list[pos] = value
+end
 
- -- **************player.p8****************
+function table.remove(list, pos)
+  assert(type(list) == 'table', "bad argument #1 to 'remove' "
+    .."(table expected, got "..type(list)..")")
+  if not pos then
+    pos = #list
+  else
+    assert(type(pos) == 'number', "bad argument #2 to 'remove' "
+      .."(number expected, got "..type(tbl)..")")
+  end
+  for i = pos, #list do
+    list[i] = list[i + 1]
+  end
+end
+
+function cam:new(mapwidth, mapheight)
+ local o = {}
+ setmetatable(o,self)
+ self.__index=self
+ o.x = 0
+ o.mapwidth=mapwidth
+ o.y = 0
+ o.mapheight=mapheight
+ return o
+end
+
+function cam:followplayer(playerx, playery)
+  self.x = mid(0,playerx-64,1024-128)
+  self.y = mid(0,((playery)-64),512-128)
+
+ camera(self.x,self.y)
+end
+
+function cam:getx()
+ return self.x
+end
+
+function cam:reset()
+ camera()
+end
 
 --__lua__
 
 function updateplayerlives()
   if player_lives <= 0 then
-    --game_over()
+    game_over()
   end
 end
 
 function initial_splash_screen()
-  splashscreentimer += 1
-  if splashscreentimer < 100 then
-    print("Starting soon \n Get Ready! \n Use z for jump  \n and \n x for firing!",
-       player1:getx() + 20, player1.y,4)
-   end
+    print("starting soon", mycam.x, mycam.y,4)
 end
 
 
@@ -116,9 +180,9 @@ function checkwallcollision(actor)
 end
 
 function player:drawlives()
-	for i=1, player_lives do
-		spr(0,mycam.x+(i*8),mycam.y)
-	end
+ for i=1, player_lives do
+  spr(0,mycam.x+(i*8),mycam.y)
+ end
 end
 
 function player:new(x, y)
@@ -161,13 +225,13 @@ function player:new(x, y)
 end
 
 function collide(agent,vx,vy,collide_condition)
-	local x1,x2,y1,y2
+ local x1,x2,y1,y2
 
-	-- we'll test two points:
+ -- we'll test two points:
   --  p--.--p (depending on the vs sign?)
   -- origin point + up-down or left right
   -- needs a proper diagram!
-	if vx!=0 then
+ if vx!=0 then
     --notice only the sign is being used here
     if sgn(vx) == -1 then
       --left corners
@@ -183,7 +247,7 @@ function collide(agent,vx,vy,collide_condition)
       y2=agent.y + agent.h
     end
 
-	else
+ else
     if sgn(vy) == -1 then
       y1=agent.y
       x1=agent.x + agent.w
@@ -195,38 +259,38 @@ function collide(agent,vx,vy,collide_condition)
       y2=agent.y + agent.h
       x2=agent.x
     end
-	end
+ end
 
-	-- add our potential movement
-	-- to our test points
+ -- add our potential movement
+ -- to our test points
   -- todo: why we need potential movements?
-	x1+=vx
-	x2+=vx
-	y1+=vy
-	y2+=vy
+ x1+=vx
+ x2+=vx
+ y1+=vy
+ y2+=vy
 
-	-- check for map-tile hits
-	local tile1=mget(x1/8,y1/8)
-	local tile2=mget(x2/8,y2/8)
+ -- check for map-tile hits
+ local tile1=mget(x1/8,y1/8)
+ local tile2=mget(x2/8,y2/8)
 
   if collide_condition == "level_change" then
     if fget(tile1,1) or fget(tile2,1) then
       return true
     end
-	-- check two corners
+ -- check two corners
   elseif collide_condition == "toponly" then
     if iswall(tile1) then
-	 		return true
-	 	end
+    return true
+   end
   else
     -- for standard collisions,
-		if iswall(tile1) or iswall(tile2) then
-	 		return true
-	 	end
+  if iswall(tile1) or iswall(tile2) then
+    return true
+   end
   end
 
- 	-- no hits have been returned
-	return false
+  -- no hits have been returned
+ return false
 end
 
 function player:getx()
@@ -419,271 +483,8 @@ function player:update()
  end
 end
 
-
- -- **************camera.p8****************
-
---__lua__
-function cam:new(mapwidth, mapheight)
- local o = {}
- setmetatable(o,self)
- self.__index=self
- o.x = 0
- o.mapwidth=mapwidth
- o.y = 0
- o.mapheight=mapheight
- return o
-end
-
-function cam:followplayer(playerx, playery)
---right-most bound for x
--- from jelpi game
---128*64 map size
--- cx=mid(cx,64,128*8-64)
--- cy=mid(cy,64,64*8-64)
---64 viewport size to keep centered
---128 may be the resolutions
-  self.x = mid(0,playerx-64,1024-128)
-  self.y = mid(0,((playery)-64),512-128)
-
- camera(self.x,self.y)
-end
-
-function cam:getx()
- return self.x
-end
-
-function cam:reset()
- camera()
-end
-
-
- -- **************pool.p8****************
-
---__lua__
-function pool:new(max)
-  local o={}
-  setmetatable(o, self)
-	self.__index = self
-  o.maxSize=max
-  o.bulletPool = {}
-  return o
-end
-
-function pool:init(object)
-  if object == "bullet" then
-    for i=1,self.maxSize,1
-    do
-      self.bulletPool[i] = bullet:new()
-    end
-  end
-end
-
-function pool:getOne(x,y)
-  if not self.bulletPool[self.maxSize].in_use then
-    self.bulletPool[self.maxSize]:spawn(x,y)
-
-    table.insert(self.bulletPool,1,self.bulletPool[self.maxSize])
-    table.remove(self.bulletPool)
-  end
-end
-
-function pool:getTwo(x1,y1,x2,y2)
-  if not self.bulletPool[self.maxSize].in_use and not self.bulletPool[self.maxSize-1].in_use then
-    self:getOne(x1,y1)
-    self:getOne(x2,y2)
-  end
-end
-
-function pool:getPool()
-  local allObjects = {}
-  for i=1,self.maxSize,1
-    do
-      if not self.bulletPool[i].in_use then
-          table.insert(allObjects ,self.bulletPool[i])
-      end
-  end
-  return allObjects
-end
-
-function pool:animate()
-  for i=1,self.maxSize,1
-  do
-    if self.bulletPool[i].in_use then
-      spr(self.bulletPool[i].sprite_number, self.bulletPool[i].x, self.bulletPool[i].y)
-    end
-  end
-end
-
-function bullet:new()
-  local o={}
-  setmetatable(o, self)
-	self.__index = self
-  o.dx=0
-  o.dy=-3
-  o.in_use=false
-  o.box={x1=2,y1=0,x2=5,y2=4}
-  o.sprite_number=6
-  return o
-end
-
-function bullet:spawn(x,y)
-  self.x=x
-  self.y=y
-  self.in_use = true
-end
-
-function bullet:clear()
-  self.x = 0
-  self.y = 0
-  self.in_use = false
-end
-
-function clearAndUse (i)
-  shooterShipBulletPool.bulletPool[i]:clear()
-  local temp = shooterShipBulletPool.bulletPool[i]
-  table.remove(shooterShipBulletPool.bulletPool, i)
-  -- printh("clear")
-  -- printh(temp.x)
-  table.insert(shooterShipBulletPool.bulletPool, temp)
-end
-
-function updateBulletForShooterEnemies()
-
-  for i=shooterShipBulletPool.maxSize,1,-1
-  do
-    if shooterShipBulletPool.bulletPool[i].in_use then
-      shooterShipBulletPool.bulletPool[i].x += shooterShipBulletPool.bulletPool[i].dx
-      shooterShipBulletPool.bulletPool[i].y += shooterShipBulletPool.bulletPool[i].dy
-      if shooterShipBulletPool.bulletPool[i].y < (320-128) or shooterShipBulletPool.bulletPool[i].y > 320 then
-          clearAndUse(i)
-      elseif shooter_collision(boss1, shooterShipBulletPool.bulletPool[i]) then
-          boss1.lives -= 1
-          explode(shooterShipBulletPool.bulletPool[i].x, shooterShipBulletPool.bulletPool[i].y)
-          clearAndUse(i)
-      else
-        for enemy in all(enemies) do
-          -- printh("ubs")
-          -- printh(shooterShipBulletPool.bulletPool[i].x)
-          if shooter_collision(shooterShipBulletPool.bulletPool[i], enemy) then
-            globals.enemyKills += 1
-            del(enemies, enemy)
-            explode(enemy.x, enemy.y)
-            clearAndUse(i)
-            break
-          end
-        end
-      end
-    end
-  end
-end
-
-
- -- **************main.p8****************
-
---__lua__
-function _init()
-  t=0
-  numberOfTicks=0
-  splashscreentimer = 0
-  player_lives = 5
-  mapwidth = 128
-  mapheight = 64
-  mycam = cam:new(mapwidth, mapheight)
-  player1 = player:new(10,0)
-  initialize_shooter()
-  boss1 = boss:new(0, 0)
-
-end
-
-
-function _update()
-  numberOfTicks += 1
-  if globals.level == 1 then
-    player1:move()
-    player1:update()
-    checkwallcollision(player1)
-    spawn_baddies(player1:getx())
-  	for i,actor in pairs(baddies) do
-  		actor:move()
-  		checkwallcollisionenemy(actor)
-  		player1:actorenemycollision(actor)
-  	end
-  elseif globals.level == 2 then
-    update_shooter()
-  elseif globals.level == 3 then
-    updateBossBattle()
-  end
-  updateplayerlives()
-end
-
-
-function _draw()
- cls()
- if globals.level==1 then
-   initial_splash_screen()
-   mycam:followplayer(player1:getx(), player1.y)
-   player1:draw()
-   map(0,0,0,0,128,128)
-   for i, actor in pairs(baddies) do
- 		actor:draw()
- 	 end
- elseif globals.level==2 then
-   map(0,0,0,0,128,128)
-   draw_shooter()
- elseif globals.level==3 then
-   map(0,0,0,0,128,128)
-   battleDraw()
- end
- player1:drawlives()
- draw_debug()
-end
-
-function draw_debug()
- -- do something
- -- print(globals.enemies,ship:x,(ship.y-mapheight)-10,11)
-
-
- -- if ship.isfaceright and self.isfaceright then
- --   print("YRE",ship.x,(ship.y-20),11)
- -- end
- -- for bullet in all(bossbullet) do
-    -- print(ship.imm,ship.x,(ship.y-20),11)
- -- end
-  -- printh(tprint(shooterShipBulletPool.bulletPool,0))
-
-end
-
-function tprint (tbl, indent)
-  if not indent then indent = 0 end
-  for k, v in pairs(tbl) do
-    formatting = string.rep("  ", indent) .. k .. ": "
-    if type(v) == "table" then
-      print(formatting)
-      tprint(v, indent+1)
-    elseif type(v) == 'boolean' then
-      print(formatting .. tostring(v))
-    else
-      print(formatting .. v)
-    end
-  end
-end
-
-
- -- **************shooter.p8****************
-
 --__lua__
 function initialize_shooter()
-  ship = {
-    sprite_number=4,
-    x=35*8,
-    y=62*8,
-    p=0,
-    t=0,
-    imm=false,
-    flash=false,
-    isfaceright=true,
-    box = {x1=0,y1=0,x2=7,y2=7}
-  }
   bound_area = {}
   bound_area.x_max = (80*8)+(64)
   bound_area.x_min = (80*8)-(64)
@@ -695,8 +496,8 @@ function initialize_shooter()
   stars = {}
   initialize_stars()
   transitionspeed = 3
-  shooterShipBulletPool = pool:new(30)
-  shooterShipBulletPool:init("bullet")
+  shootershipbulletpool = pool:new(30)
+  shootershipbulletpool:init("bullet")
 end
 
 function initialize_stars()
@@ -711,40 +512,39 @@ end
 
 
 function draw_shooter()
-  drawStars()
-  drawShip()
-  drawEnemy()
-  shooterShipBulletPool:animate()
-  drawExplosion()
+  drawstars()
+  drawship()
+  drawenemy()
+  shootershipbulletpool:animate()
+  drawexplosion()
 end
 
 function update_shooter()
   update_stars()
-  updateCameraPositionForShooter()
-  if updateShipTransition() then
-    updateShipInvulnerability()
-    updateShooterExplosions()
-    updateRespawnEnemyStatus()
-    transitionLevel()
-    updateShooterEnemies()
-    updateBulletForShooterEnemies()
-    updateShipButtonState()
+  if updateshiptransition() then
+    updateshipinvulnerability()
+    updateshooterexplosions()
+    updaterespawnenemystatus()
+    transitionlevel()
+    updateshooterenemies()
+    updatebulletforshooterenemies()
+    updateshipbuttonstate()
   end
 end
 
-function drawExplosion()
+function drawexplosion()
   for explosion in all(explosions) do
     circ(explosion.x,explosion.y,explosion.t/2,8+explosion.t%3)
   end
 end
 
-function drawStars()
+function drawstars()
   for st in all(stars) do
    pset(st.x,st.y,6)
   end
 end
 
-function drawShip()
+function drawship()
   if not ship.flash then
    spr(ship.sprite_number,ship.x,ship.y)
   end
@@ -760,14 +560,14 @@ function drawShip()
   end
 end
 
-function drawEnemy()
+function drawenemy()
   for enemy in all(enemies) do
     spr(enemy.sprite_number, enemy.x, enemy.y)
   end
 end
 
-function drawBullet()
-  shooterShipBulletPool:animate()
+function drawbullet()
+  shootershipbulletpool:animate()
 end
 
 function update_stars()
@@ -811,17 +611,15 @@ function respawn()
   end
 end
 
-function transitionLevel()
-  if globals.enemyKills > 5 then
+function transitionlevel()
+  if globals.enemykills > 5 then
     globals.level=3
   end
 end
 
-function updateCameraPositionForShooter()
-    mycam:followplayer(ship.x, ship.y-50)
-end
 
-function updateShipTransition()
+
+function updateshiptransition()
   if ship.y > (40*8 - 40) then
      ship.y -= transitionspeed
      return false
@@ -835,10 +633,10 @@ function explode(x,y)
 end
 
 function fire(x,y)
-  shooterShipBulletPool:getOne(x,y)
+  shootershipbulletpool:getone(x,y)
 end
 
-function updateShooterExplosions()
+function updateshooterexplosions()
   for ex in all(explosions) do
     ex.t+=1
     if ex.t == 13
@@ -848,7 +646,7 @@ function updateShooterExplosions()
   end
 end
 
-function updateShipInvulnerability ()
+function updateshipinvulnerability ()
   if ship.imm then
     ship.t += 1
     if ship.t > 60 then
@@ -858,12 +656,12 @@ function updateShipInvulnerability ()
   end
 end
 
-function updateShooterEnemies ()
+function updateshooterenemies ()
   for enemy in all(enemies) do
     -- go down
     enemy.my += 1.3
-    enemy.x = enemy.r*sin(enemy.d*numberOfTicks/50) + enemy.mx
-    enemy.y = enemy.r*cos(numberOfTicks/50) + enemy.my
+    enemy.x = enemy.r*sin(enemy.d*numberofticks/50) + enemy.mx
+    enemy.y = enemy.r*cos(numberofticks/50) + enemy.my
     if shooter_collision(ship, enemy) and not ship.imm then
       ship.imm = true
       player_lives -= 1
@@ -875,7 +673,7 @@ function updateShooterEnemies ()
   end
 end
 
-function updateShipButtonState()
+function updateshipbuttonstate()
   if btn(0) then
     ship.x-=1
     ship.isfaceright=false
@@ -897,7 +695,7 @@ function updateShipButtonState()
   if btnp(5) then fire(ship.x,ship.y) end
 end
 
-function updateRespawnEnemyStatus ()
+function updaterespawnenemystatus ()
   local number_of_enemies = tablelength(enemies)
   if number_of_enemies <= 0 then
     respawn()
@@ -910,57 +708,295 @@ function tablelength(t)
   return count
 end
 
+--__lua__
+function pool:new(max)
+  local o={}
+  setmetatable(o, self)
+ self.__index = self
+  o.maxsize=max
+  o.bulletpool = {}
+  return o
+end
 
- -- **************bossBattle.p8****************
+function pool:init(object)
+  if object == "bullet" then
+    for i=1,self.maxsize,1
+    do
+      self.bulletpool[i] = bullet:new()
+    end
+  end
+end
+
+function pool:getone(x,y)
+  if not self.bulletpool[self.maxsize].in_use then
+    self.bulletpool[self.maxsize]:spawn(x,y)
+
+    table.insert(self.bulletpool,1,self.bulletpool[self.maxsize])
+    table.remove(self.bulletpool)
+  end
+end
+
+function pool:gettwo(x1,y1,x2,y2)
+  if not self.bulletpool[self.maxsize].in_use and not self.bulletpool[self.maxsize-1].in_use then
+    self:getone(x1,y1)
+    self:getone(x2,y2)
+  end
+end
+
+function pool:getpool()
+  local allobjects = {}
+  for i=1,self.maxsize,1
+    do
+      if not self.bulletpool[i].in_use then
+          table.insert(allobjects ,self.bulletpool[i])
+      end
+  end
+  return allobjects
+end
+
+function pool:animate()
+  for i=1,self.maxsize,1
+  do
+    if self.bulletpool[i].in_use then
+      spr(self.bulletpool[i].sprite_number, self.bulletpool[i].x, self.bulletpool[i].y)
+    end
+  end
+end
+
+function bullet:new()
+  local o={}
+  setmetatable(o, self)
+ self.__index = self
+  o.dx=0
+  o.dy=-3
+  o.in_use=false
+  o.box={x1=2,y1=0,x2=5,y2=4}
+  o.sprite_number=6
+  return o
+end
+
+function bullet:spawn(x,y)
+  self.x=x
+  self.y=y
+  self.in_use = true
+end
+
+function bullet:clear()
+  self.x = 0
+  self.y = 0
+  self.in_use = false
+end
+
+function clearanduse (i)
+  shootershipbulletpool.bulletpool[i]:clear()
+  local temp = shootershipbulletpool.bulletpool[i]
+  table.remove(shootershipbulletpool.bulletpool, i)
+  table.insert(shootershipbulletpool.bulletpool, temp)
+end
+
+function updatebulletforshooterenemies()
+
+  for i=shootershipbulletpool.maxsize,1,-1
+  do
+    if shootershipbulletpool.bulletpool[i].in_use then
+      shootershipbulletpool.bulletpool[i].x += shootershipbulletpool.bulletpool[i].dx
+      shootershipbulletpool.bulletpool[i].y += shootershipbulletpool.bulletpool[i].dy
+      if shootershipbulletpool.bulletpool[i].y < (320-128) or shootershipbulletpool.bulletpool[i].y > 320 then
+          clearanduse(i)
+      elseif shooter_collision(boss1, shootershipbulletpool.bulletpool[i]) then
+          boss1.lives -= 1
+          explode(shootershipbulletpool.bulletpool[i].x, shootershipbulletpool.bulletpool[i].y)
+          clearanduse(i)
+      else
+        for enemy in all(enemies) do
+          -- printh("ubs")
+          -- printh(shootershipbulletpool.bulletpool[i].x)
+          if shooter_collision(shootershipbulletpool.bulletpool[i], enemy) then
+            globals.enemykills += 1
+            del(enemies, enemy)
+            explode(enemy.x, enemy.y)
+            clearanduse(i)
+            break
+          end
+        end
+      end
+    end
+  end
+end
 
 --__lua__
-
-function battleDraw()
-  drawStars()
-  drawShip()
-  drawBullet()
-  drawBoss()
-  drawExplosionForBoss()
-  drawBossBullet()
+-- create a baddie
+function boss:new(x,y)
+ local o={}
+ setmetatable(o, self)
+ self.__index = self
+ o.x=x
+ o.y=y
+  o.w=8
+  o.h=8
+ o.sx = 64
+ o.sy = 0
+ o.start_frame = 64
+ o.number_of_frames = 2
+ o.dx=0
+ o.dy=0
+  o.hurtimer = 0
+ o.isfaceright=true
+ o.bounce=true --do we turn around at a wall?
+ o.bad=true
+  o.box={x1=0,y1=0,x2=7*5,y2=7*5}
+ o.spawn = false
+ o.lives = 10
+ return o
 end
 
-function updateBossBattle()
-  update_stars()
-  updateShipInvulnerability()
-  updateShooterExplosions()
-  updateCameraPositionOfBossBattle()
-  updateBulletForShooterEnemies()
-  updateShipButtonState()
-  boss1:spawnInit()
-  boss1:move()
-  if numberOfTicks%4==0 then
-    fireBossBullet(boss1.x+((boss1.w*5)/2) - 2*5,boss1.y+(boss1.h*5)/2)
-    fireBossBullet(boss1.x+((boss1.w*5)/2) + 2*5,boss1.y+(boss1.h*5)/2)
+function boss:draw()
+  sspr(self.sx,
+       self.sy,
+       self.w,self.h,
+       self.x,
+       self.y,
+       self.w*5,self.h*5,
+       false)
+end
+
+function boss:spawninit()
+ if not self.spawn then
+  self.x = ship.x
+  self.y =  ship.y - 50
+  self.spawn = true
+ end
+end
+
+function boss:move()
+ if self.x >= ship.x+50 then
+  self.isfaceright = false
+ elseif self.x <= ship.x-50 then
+  self.isfaceright = true
+ end
+
+ if self.isfaceright and not ship.isfaceright then
+  self.x += 1
+  self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
+ elseif not self.isfaceright and ship.isfaceright then
+  self.x -= 1
+  self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
+ elseif self.isfaceright and ship.isfaceright then
+  self.x += 2
+  self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
+ elseif not self.isfaceright and not ship.isfaceright then
+  self.x -= 2
+  self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
+ end
+
+end
+
+function boss:update()
+end
+
+function drawboss()
+  boss1:draw()
+end
+
+function updatecamerapositionofbossbattle()
+    mycam:followplayer(ship.x, ship.y - 50)
+end
+
+function boss:bosshurt()
+ sspr(self.sx + 8,
+       self.sy,
+       self.w,self.h,
+       self.x,
+       self.y,
+       self.w*5,self.h*5,
+       false)
+end
+
+function drawexplosionforboss()
+  for explosion in all(explosions) do
+    circ(explosion.x,explosion.y,explosion.t/2,8+explosion.t%3)
+  boss1:bosshurt()
   end
-  updateBulletForBoss()
+end
+
+function firebossbullet(x,y)
+  local boss_bullet = {
+    sprite_number=6,
+    x=x,
+    y=y,
+    dx=0,
+    dy=10,
+    box={x1=2,y1=0,x2=5,y2=4}
+  }
+  add(bossbullets,boss_bullet)
+end
+
+function updatebulletforboss()
+  for boss_bullet in all(bossbullets) do
+    -- bullet.x += bullet.dx
+    boss_bullet.y += 4
+    -- if bullet.y < (ship.y - 64) or bullet.y > (ship.y + 10) then
+    --   del(bossbullet,bullet)
+    -- end
+
+    if shooter_collision(ship, boss_bullet) and not ship.imm then
+        player_lives -= 1
+        del(bossbullet,boss_bullet)
+    ship.imm = true
+    end
+  end
+end
+
+function drawbossbullet()
+  for boss_bullet in all(bossbullets) do
+   spr(boss_bullet.sprite_number,boss_bullet.x,boss_bullet.y)
+  end
 end
 
 
- -- **************ground_enemy.p8****************
+function battledraw()
+  drawstars()
+  drawship()
+  drawbullet()
+  drawboss()
+  drawexplosionforboss()
+  drawbossbullet()
+end
+
+function updatebossbattle()
+  update_stars()
+  updateshipinvulnerability()
+  updateshooterexplosions()
+  --updatecamerapositionofbossbattle()
+  updatebulletforshooterenemies()
+  updateshipbuttonstate()
+  boss1:spawninit()
+  boss1:move()
+  if numberofticks%4==0 then
+    firebossbullet(boss1.x+((boss1.w*5)/2) - 2*5,boss1.y+(boss1.h*5)/2)
+    firebossbullet(boss1.x+((boss1.w*5)/2) + 2*5,boss1.y+(boss1.h*5)/2)
+  end
+  updatebulletforboss()
+end
 
 --__lua__
 -- create a baddie
 function baddie:new(x,y)
-	local o={}
-	setmetatable(o, self)
-	self.__index = self
-	o.x=x
-	o.y=y
+ local o={}
+ setmetatable(o, self)
+ self.__index = self
+ o.x=x
+ o.y=y
   o.w=8
   o.h=8
-	o.sx = 0
-	o.sy = 8
-	o.start_frame = 0
-	o.number_of_frames = 2
-	o.dx=0
-	o.dy=0
-	o.spr=016
-	o.frms=2
+ o.sx = 0
+ o.sy = 8
+ o.start_frame = 0
+ o.number_of_frames = 2
+ o.dx=0
+ o.dy=0
+ o.spr=016
+ o.frms=2
   o.standing=false
   o.hanging=false
   o.jumppressed = false
@@ -969,29 +1005,29 @@ function baddie:new(x,y)
   o.landtimer = 0
   o.hurtimer = 0
   o.jumpvelocity = 4
-	o.isfaceright=false
-	o.bounce=true --do we turn around at a wall?
-	o.bad=true
+ o.isfaceright=false
+ o.bounce=true --do we turn around at a wall?
+ o.bad=true
   o.box={x1=0,y1=0,x2=7,y2=7}
-	return o
+ return o
 
 end
 
 function baddie:draw()
-	if self.isfaceright then
-		anim(self,2,true)
-	else
-		anim(self,2,false)
-	end
+ if self.isfaceright then
+  anim(self,2,true)
+ else
+  anim(self,2,false)
+ end
 end
 
 function baddie:move()
-	self.startx=self.x
-	if self.isfaceright then
-		self.dx=1
-	else
-		self.dx=-1
-	end
+ self.startx=self.x
+ if self.isfaceright then
+  self.dx=1
+ else
+  self.dx=-1
+ end
 end
 
 function baddie:update()
@@ -1003,8 +1039,8 @@ function spawn_baddies(plyrx)
       val = mget(x,y)
       if fget(val,2) then
        local bad = baddie:new(x*8,y*8)
-   		  add(baddies,bad)
-   		   mset(x,y,0)
+       add(baddies,bad)
+        mset(x,y,0)
       end
      end
     end
@@ -1062,269 +1098,6 @@ function checkwallcollisionenemy(actor)
   actor.dx*=.98
 
 end
-
-
- -- **************missing.p8****************
-
--- pico8-missing-builtins v0.2.0
--- https://github.com/adamscott/pico8-missing-builtins
---__lua__
-__setmetatable = setmetatable
-__metatables = {}
-function setmetatable (object, mt)
-  __metatables[object] = mt
-  return __setmetatable(object, mt)
-end
--- getmetatable depends on this setmetatable implementation
-function getmetatable (object)
-  return __metatables[object]
-end
-
--- rawget depends on getmetatable
-function rawget (tbl, index)
-  assert(type(tbl) == 'table', "bad argument #1 to 'rawget' "
-    .."(table expected, got "..type(tbl)..")")
-  local ti = tbl.__index
-  local mt = getmetatable(tbl)
-  local value = nil
-  tbl.__index = tbl
-  __setmetatable(tbl, nil)
-  value = tbl[index]
-  tbl.__index = ti
-  __setmetatable(tbl, mt)
-  return value
-end
-
-function unpack (arr, i, j)
-  local n = {}
-  local k = 0
-  local initial_i = i
-  j = j or #arr
-  for i = i or 1, j do
-    k = k + 1
-    n[k] = arr[i]
-  end
-  local l = k
-  local function create_arg(l, ...)
-    if l == 0 then
-      return ...
-    else
-      return create_arg(l - 1, n[l], ...)
-    end
-  end
-  return create_arg(l)
-end
-
-function ipairs (a)
-  local function iter(a, i)
-    i = i + 1
-    local v = a[i]
-    if v then
-      return i, v
-    end
-  end
-  return iter, a, 0
-end
-
-table = {}
-table.pack = function (...) return {...} end
-table.unpack = unpack
-
-function table.insert (list, pos, value)
-  assert(type(list) == 'table', "bad argument #1 to 'insert' "
-    .."(table expected, got "..type(list)..")")
-  if pos and not value then
-    value = pos
-    pos = #list + 1
-  else
-    assert(type(pos) == 'number', "bad argument #2 to 'insert' "
-      .."(number expected, got "..type(pos)..")")
-  end
-  if pos <= #list then
-    for i = #list, pos, -1 do
-      list[i + 1] = list[i]
-    end
-  end
-  list[pos] = value
-end
-
-function table.remove(list, pos)
-  assert(type(list) == 'table', "bad argument #1 to 'remove' "
-    .."(table expected, got "..type(list)..")")
-  if not pos then
-    pos = #list
-  else
-    assert(type(pos) == 'number', "bad argument #2 to 'remove' "
-      .."(number expected, got "..type(tbl)..")")
-  end
-  for i = pos, #list do
-    list[i] = list[i + 1]
-  end
-end
-
-function table.sort (arr, comp)
-  if not comp then
-    comp = function (a, b)
-      return a < b
-    end
-  end
-  local function partition (a, lo, hi)
-      pivot = a[hi]
-      i = lo - 1
-      for j = lo, hi - 1 do
-        if comp(a[j], pivot) then
-          i = i + 1
-          a[i], a[j] = a[j], a[i]
-        end
-      end
-      a[i + 1], a[hi] = a[hi], a[i + 1]
-      return i + 1
-    end
-  local function quicksort (a, lo, hi)
-    if lo < hi then
-      p = partition(a, lo, hi)
-      quicksort(a, lo, p - 1)
-      return quicksort(a, p + 1, hi)
-    end
-  end
-  return quicksort(arr, 1, #arr)
-end
--- END pico8-missing-builtins v0.1.3
-
-
- -- **************boss.p8****************
-
---__lua__
--- create a baddie
-function boss:new(x,y)
-	local o={}
-	setmetatable(o, self)
-	self.__index = self
-	o.x=x
-	o.y=y
-  o.w=8
-  o.h=8
-	o.sx = 64
-	o.sy = 0
-	o.start_frame = 64
-	o.number_of_frames = 2
-	o.dx=0
-	o.dy=0
-  o.hurtimer = 0
-	o.isfaceright=true
-	o.bounce=true --do we turn around at a wall?
-	o.bad=true
-  o.box={x1=0,y1=0,x2=7*5,y2=7*5}
-	o.spawn = false
-	o.lives = 10
-	return o
-end
-
-function boss:draw()
-  sspr(self.sx,
-       self.sy,
-       self.w,self.h,
-       self.x,
-       self.y,
-       self.w*5,self.h*5,
-       false)
-end
-
-function boss:spawnInit()
-	if not self.spawn then
-		self.x = ship.x
-		self.y =  ship.y - 50
-		self.spawn = true
-	end
-end
-
-function boss:move()
-	if self.x >= ship.x+50 then
-		self.isfaceright = false
-	elseif self.x <= ship.x-50 then
-		self.isfaceright = true
-	end
-
-	if self.isfaceright and not ship.isfaceright then
-		self.x += 1
-		self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
-	elseif not self.isfaceright and ship.isfaceright then
-		self.x -= 1
-		self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
-	elseif self.isfaceright and ship.isfaceright then
-		self.x += 2
-		self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
-	elseif not self.isfaceright and not ship.isfaceright then
-		self.x -= 2
-		self.y = 10 * sin(self.x/50 * 0.5 * 3.14) + (ship.y - 80)
-	end
-
-end
-
-function boss:update()
-end
-
-function drawBoss()
-  boss1:draw()
-end
-
-function updateCameraPositionOfBossBattle()
-    mycam:followplayer(ship.x, ship.y-50)
-end
-
-function boss:bossHurt()
-	sspr(self.sx + 8,
-       self.sy,
-       self.w,self.h,
-       self.x,
-       self.y,
-       self.w*5,self.h*5,
-       false)
-end
-
-function drawExplosionForBoss()
-  for explosion in all(explosions) do
-    circ(explosion.x,explosion.y,explosion.t/2,8+explosion.t%3)
-		boss1:bossHurt()
-  end
-end
-
-function fireBossBullet(x,y)
-  local boss_bullet = {
-    sprite_number=6,
-    x=x,
-    y=y,
-    dx=0,
-    dy=10,
-    box={x1=2,y1=0,x2=5,y2=4}
-  }
-  add(bossbullets,boss_bullet)
-end
-
-function updateBulletForBoss()
-  for boss_bullet in all(bossbullets) do
-    -- bullet.x += bullet.dx
-    boss_bullet.y += 4
-    -- if bullet.y < (ship.y - 64) or bullet.y > (ship.y + 10) then
-    --   del(bossbullet,bullet)
-    -- end
-
-    if shooter_collision(ship, boss_bullet) and not ship.imm then
-        player_lives -= 1
-        del(bossbullet,boss_bullet)
-				ship.imm = true
-    end
-  end
-end
-
-function drawBossBullet()
-  for boss_bullet in all(bossbullets) do
-   spr(boss_bullet.sprite_number,boss_bullet.x,boss_bullet.y)
-  end
-end
-
-
- -- **************collision.p8****************
 
 --__lua__
 function intersect(min1, max1, min2, max2)
@@ -1390,7 +1163,70 @@ function anim(actor, anim_speed, flipper)
 end
 
 
- -- **************gfx.p8****************
+
+
+function _init()
+  t=0
+  numberofticks=0
+  splashscreentimer = 0
+  player_lives = 5
+  mapwidth = 128
+  mapheight = 64
+  mycam = cam:new(mapwidth, mapheight)
+  player1 = player:new(10.0,0.0)
+  initialize_shooter()
+  boss1 = boss:new(0, 0)
+end
+
+
+function _update()
+  numberofticks += 1
+  if globals.level == 1 then
+    player1:move()
+    player1:update()
+    checkwallcollision(player1)
+    spawn_baddies(player1:getx())
+   for i,actor in pairs(baddies) do
+    actor:move()
+    checkwallcollisionenemy(actor)
+    player1:actorenemycollision(actor)
+   end
+  elseif globals.level == 2 then
+    update_shooter()
+  elseif globals.level == 3 then
+    updatebossbattle()
+  end
+  updateplayerlives()
+end
+
+
+function _draw()
+ cls()
+ if globals.level==1 then
+   initial_splash_screen()
+   mycam:followplayer(player1:getx(), player1.y)
+   player1:draw()
+   map(0,0,0,0,128,128)
+   for i, actor in pairs(baddies) do
+   actor:draw()
+   end
+ elseif globals.level==2 then
+   mycam:followplayer(ship.x, ship.y-50)
+   draw_shooter()
+   map(0,0,0,0,128,128)
+ elseif globals.level==3 then
+   mycam:followplayer(ship.x, ship.y - 50)
+   battledraw()
+   map(0,0,0,0,128,128)
+ end
+ player1:drawlives()
+ draw_debug()
+end
+
+function draw_debug()
+    --print(ship.x,mycam.x,mycam.y,11)
+    --print(ship.y,mycam.x + 20,mycam.y,11)
+end
 
 
 
@@ -1689,3 +1525,5 @@ __map__
 0000000000000202020202020202020202020202020202020200000000000000000002020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000202020000000000000000000000020200000000000000000000000000000202000000000002020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000200020000000000000000000000000202000000000000000000000000000002020202020202000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+

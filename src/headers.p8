@@ -5,9 +5,16 @@ globals = {
  gravity = 0.2,
  dt = 0.5,
  level=1,
+ enemyKills=0,
 }
 player = {}
 baddie={}
 baddies = {}
 player_bullets={}
 cam = {}
+boss ={}
+bossHurtExplosions={}
+bossbullets = {}
+
+bullet={}
+pool={}
