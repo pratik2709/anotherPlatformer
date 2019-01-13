@@ -20,7 +20,7 @@ function boss:new(x,y)
 	o.bad=true
   o.box={x1=0,y1=0,x2=7*5,y2=7*5}
 	o.spawn = false
-	o.lives = 10
+	o.lives = 20
 	return o
 end
 
@@ -125,4 +125,20 @@ function drawBossBullet()
   for boss_bullet in all(bossbullets) do
    spr(boss_bullet.sprite_number,boss_bullet.x,boss_bullet.y)
   end
+end
+
+function updatebosslives()
+  if boss1.lives <= 0 then
+    game_won()
+  end
+end
+
+function game_won()
+  _update = update_over
+  _draw = draw_over_won
+end
+
+function draw_over_won()
+    cls()
+    print("You Won!", ship.x,ship.y - 40,4)
 end

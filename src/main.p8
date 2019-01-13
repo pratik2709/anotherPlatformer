@@ -30,6 +30,7 @@ function _update()
     update_shooter()
   elseif globals.level == 3 then
     updateBossBattle()
+    updatebosslives()
   end
   updateplayerlives()
 end
@@ -58,7 +59,9 @@ end
 
 function draw_debug()
  -- do something
- -- print(globals.enemies,ship:x,(ship.y-mapheight)-10,11)
+ -- if boss1 ~= nil then
+   print(boss1.lives,ship.x,(ship.y-20),11)
+ -- end
 
 
  -- if ship.isfaceright and self.isfaceright then

@@ -4,7 +4,7 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level=1,
+ level=2,
  enemyKills=0,
 }
 player = {}
@@ -26,7 +26,7 @@ pool={}
 
 function updateplayerlives()
   if player_lives <= 0 then
-    --game_over()
+    game_over()
   end
 end
 
@@ -612,6 +612,7 @@ function _update()
     update_shooter()
   elseif globals.level == 3 then
     updateBossBattle()
+    updatebosslives()
   end
   updateplayerlives()
 end
@@ -640,7 +641,9 @@ end
 
 function draw_debug()
  -- do something
- -- print(globals.enemies,ship:x,(ship.y-mapheight)-10,11)
+ -- if boss1 ~= nil then
+   print(boss1.lives,ship.x,(ship.y-20),11)
+ -- end
 
 
  -- if ship.isfaceright and self.isfaceright then
@@ -790,7 +793,7 @@ end
 
 function draw_over()
   cls()
-  print("game over", ship.x,ship.y,4)
+  print("game over", ship.x,ship.y -40 ,4)
 end
 
 function respawn()
@@ -1216,7 +1219,7 @@ function boss:new(x,y)
 	o.bad=true
   o.box={x1=0,y1=0,x2=7*5,y2=7*5}
 	o.spawn = false
-	o.lives = 10
+	o.lives = 20
 	return o
 end
 
@@ -1321,6 +1324,22 @@ function drawBossBullet()
   for boss_bullet in all(bossbullets) do
    spr(boss_bullet.sprite_number,boss_bullet.x,boss_bullet.y)
   end
+end
+
+function updatebosslives()
+  if boss1.lives <= 0 then
+    game_won()
+  end
+end
+
+function game_won()
+  _update = update_over
+  _draw = draw_over_won
+end
+
+function draw_over_won()
+    cls()
+    print("You Won!", ship.x,ship.y - 40,4)
 end
 
 

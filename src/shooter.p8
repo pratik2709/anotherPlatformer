@@ -117,7 +117,7 @@ end
 
 function draw_over()
   cls()
-  print("game over", ship.x,ship.y,4)
+  print("game over", ship.x,ship.y -40 ,4)
 end
 
 function respawn()
