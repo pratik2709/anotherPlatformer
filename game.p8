@@ -4,7 +4,7 @@ __lua__
 globals = {
  gravity = 0.2,
  dt = 0.5,
- level=2,
+ level=1,
  enemyKills=0,
 }
 player = {}
@@ -26,7 +26,7 @@ pool={}
 
 function updateplayerlives()
   if player_lives <= 0 then
-    game_over()
+    --game_over()
   end
 end
 
@@ -542,8 +542,8 @@ function clearAndUse (i)
   shooterShipBulletPool.bulletPool[i]:clear()
   local temp = shooterShipBulletPool.bulletPool[i]
   table.remove(shooterShipBulletPool.bulletPool, i)
-  printh("clear")
-  printh(temp.x)
+  -- printh("clear")
+  -- printh(temp.x)
   table.insert(shooterShipBulletPool.bulletPool, temp)
 end
 
@@ -562,8 +562,8 @@ function updateBulletForShooterEnemies()
           clearAndUse(i)
       else
         for enemy in all(enemies) do
-          printh("ubs")
-          printh(shooterShipBulletPool.bulletPool[i].x)
+          -- printh("ubs")
+          -- printh(shooterShipBulletPool.bulletPool[i].x)
           if shooter_collision(shooterShipBulletPool.bulletPool[i], enemy) then
             globals.enemyKills += 1
             del(enemies, enemy)
@@ -649,8 +649,23 @@ function draw_debug()
  -- for bullet in all(bossbullet) do
     -- print(ship.imm,ship.x,(ship.y-20),11)
  -- end
+  -- printh(tprint(shooterShipBulletPool.bulletPool,0))
 
+end
 
+function tprint (tbl, indent)
+  if not indent then indent = 0 end
+  for k, v in pairs(tbl) do
+    formatting = string.rep("  ", indent) .. k .. ": "
+    if type(v) == "table" then
+      print(formatting)
+      tprint(v, indent+1)
+    elseif type(v) == 'boolean' then
+      print(formatting .. tostring(v))
+    else
+      print(formatting .. v)
+    end
+  end
 end
 
 
@@ -860,29 +875,6 @@ function updateShooterEnemies ()
   end
 end
 
--- function updateBulletForShooterEnemies()
---   for bullet in all(bullets) do
---     bullet.x += bullet.dx
---     bullet.y += bullet.dy
---     if bullet.y < (320-128) or bullet.y > 320 then
---       del(bullets,bullet)
---     end
---     for enemy in all(enemies) do
---       if shooter_collision(bullet, enemy) then
---         globals.enemyKills += 1
---         del(enemies, enemy)
---         explode(enemy.x, enemy.y)
---         del(bullets,bullet)
---       end
---     end
---     if shooter_collision(boss1, bullet) then
---         boss1.lives -= 1
---         explode(bullet.x, bullet.y)
---         del(bullets,bullet)
---     end
---   end
--- end
-
 function updateShipButtonState()
   if btn(0) then
     ship.x-=1
@@ -921,7 +913,7 @@ end
 
  -- **************bossBattle.p8****************
 
-__lua__
+--__lua__
 
 function battleDraw()
   drawStars()

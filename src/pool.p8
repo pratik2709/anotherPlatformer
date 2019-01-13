@@ -81,8 +81,8 @@ function clearAndUse (i)
   shooterShipBulletPool.bulletPool[i]:clear()
   local temp = shooterShipBulletPool.bulletPool[i]
   table.remove(shooterShipBulletPool.bulletPool, i)
-  printh("clear")
-  printh(temp.x)
+  -- printh("clear")
+  -- printh(temp.x)
   table.insert(shooterShipBulletPool.bulletPool, temp)
 end
 
@@ -101,8 +101,8 @@ function updateBulletForShooterEnemies()
           clearAndUse(i)
       else
         for enemy in all(enemies) do
-          printh("ubs")
-          printh(shooterShipBulletPool.bulletPool[i].x)
+          -- printh("ubs")
+          -- printh(shooterShipBulletPool.bulletPool[i].x)
           if shooter_collision(shooterShipBulletPool.bulletPool[i], enemy) then
             globals.enemyKills += 1
             del(enemies, enemy)

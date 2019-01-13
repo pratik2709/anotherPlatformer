@@ -1,4 +1,4 @@
-__lua__
+--__lua__
 
 function battleDraw()
   drawStars()

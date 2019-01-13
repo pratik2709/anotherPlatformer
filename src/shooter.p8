@@ -202,29 +202,6 @@ function updateShooterEnemies ()
   end
 end
 
--- function updateBulletForShooterEnemies()
---   for bullet in all(bullets) do
---     bullet.x += bullet.dx
---     bullet.y += bullet.dy
---     if bullet.y < (320-128) or bullet.y > 320 then
---       del(bullets,bullet)
---     end
---     for enemy in all(enemies) do
---       if shooter_collision(bullet, enemy) then
---         globals.enemyKills += 1
---         del(enemies, enemy)
---         explode(enemy.x, enemy.y)
---         del(bullets,bullet)
---       end
---     end
---     if shooter_collision(boss1, bullet) then
---         boss1.lives -= 1
---         explode(bullet.x, bullet.y)
---         del(bullets,bullet)
---     end
---   end
--- end
-
 function updateShipButtonState()
   if btn(0) then
     ship.x-=1
